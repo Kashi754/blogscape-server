@@ -1,0 +1,29 @@
+{
+  "name": "blogscape-api",
+  "version": "1.0.0",
+  "description": "Blogscape API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --env-file=.env src/index.js",
+    "dev": "nodemon --exec node --env-file=.env src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kashi754",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-async-handler": "^1.2.0",
+    "imagekit": "^5.0.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5"
+  }
+}
