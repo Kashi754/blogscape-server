@@ -1,10 +1,9 @@
-const ImageKit = require('imagekit');
 const cors = require('cors');
 const express = require('express');
-const crypto = require('crypto');
+const morgan = require('morgan');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
@@ -22,8 +21,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('common'));
 }
 
+app.use('/api/v1', require('./src/routes/v1/v1Router'));
+
 app.listen(PORT, (error) => {
   if (!error) {
+    console.log(process.env.DB_HOST);
     console.log(`Server is successfully running on PORT: ${PORT}`);
   } else {
     console.log("Error occurred, server can't start", error);
