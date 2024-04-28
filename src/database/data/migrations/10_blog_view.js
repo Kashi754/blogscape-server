@@ -10,7 +10,9 @@ const BLOG_VIEW_CONFIGURATION = `
     blog.title as title,
     blog.description as description,
     users.display_name as author,
-    blog.image_id as image_id,
+    image.image as image,
+    image.thumbnail as thumbnail,
+    image.file_id as file_id,
     blog.created_at as created_at,
     followers,
     setweight(to_tsvector('english', blog.title), 'A') ||
@@ -18,6 +20,7 @@ const BLOG_VIEW_CONFIGURATION = `
     setweight(to_tsvector('simple', users.display_name), 'A') AS search
   FROM blog
   JOIN users ON users.id = blog.user_id
+  LEFT OUTER JOIN image ON image.file_id = blog.image_id
   LEFT OUTER JOIN
     (SELECT blog_id, COUNT(user_id) as followers
     FROM blog_following

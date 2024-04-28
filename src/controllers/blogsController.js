@@ -5,7 +5,7 @@ const BlogModel = require('../models/BlogModel');
 exports.blogList = asyncHandler(async (req, res, next) => {
   const { beforeDate, beforeId, limit } = req.query;
 
-  const userId = 'df751170-1d53-46ca-89b6-b549fd62e0eb';
+  const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
   const blogs = await BlogModel.list(userId, beforeDate, beforeId, limit);
 
   res.send(blogs);
@@ -13,7 +13,7 @@ exports.blogList = asyncHandler(async (req, res, next) => {
 
 exports.blogSearch = asyncHandler(async (req, res, next) => {
   const { q: query, beforeRank, beforeId, limit } = req.query;
-  const userId = 'df751170-1d53-46ca-89b6-b549fd62e0eb';
+  const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
   const blogs = await BlogModel.search(
     userId,
     query,
@@ -28,6 +28,13 @@ exports.blogSearch = asyncHandler(async (req, res, next) => {
   } else {
     res.send(blogs);
   }
+});
+
+exports.blogUpdate = asyncHandler(async (req, res, next) => {
+  const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
+
+  const updatedBlog = await BlogModel.update(userId, req.body);
+  res.send(updatedBlog);
 });
 
 exports.blogPopularList = asyncHandler(async (req, res, next) => {

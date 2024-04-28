@@ -17,7 +17,7 @@ exports.up = function (knex) {
       .string('image_id', 50)
       .nullable()
       .unique()
-      .references('image.id')
+      .references('image.file_id')
       .onUpdate('cascade')
       .onDelete('set null');
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());

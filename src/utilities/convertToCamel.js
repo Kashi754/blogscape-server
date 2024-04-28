@@ -15,7 +15,7 @@ function convertToCamel(struct) {
     return camelCaseStruct;
   }
   // else convert string to camel case
-  else if (struct) {
+  else if (struct instanceof String) {
     return struct.replace(/(\_\w)/g, (match) => match[1].toUpperCase());
   } else return;
 }

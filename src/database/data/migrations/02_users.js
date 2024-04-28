@@ -19,7 +19,7 @@ exports.up = function (knex) {
         .string('image_id', 50)
         .nullable()
         .unique()
-        .references('image.id')
+        .references('image.file_id')
         .onUpdate('cascade')
         .onDelete('set null');
       table.string('location', 56).nullable();

@@ -1,11 +1,16 @@
 const Model = require('./Model/Model');
 const FollowersModel = require('./BlogFollowersModel');
+const ImageModel = require('./ImageModel');
 const knex = require('../database');
+const axios = require('axios');
+const { imageKit } = require('../config/imageKit');
+require('dotenv').config();
 
 const defaultBlogData = {};
 
 class BlogModel extends Model {
-  static tableName = 'fts_blog';
+  static tableName = 'blog';
+  static materializedView = 'fts_blog';
   static resultLimit = 10;
   static resultOrder = [
     {
@@ -22,7 +27,9 @@ class BlogModel extends Model {
     'fts_blog.title as title',
     'fts_blog.description as description',
     'fts_blog.author as author',
-    'fts_blog.image_id as image_id',
+    'fts_blog.image as image',
+    'fts_blog.thumbnail as thumbnail',
+    'fts_blog.file_id as file_id',
     'fts_blog.created_at as created_at',
     'blog_followers.followers',
     knex.raw(
@@ -82,6 +89,54 @@ class BlogModel extends Model {
     });
   }
 
+  static async update(userId, { title, description, ...image }) {
+    BlogModel.userId = userId;
+    const results = await knex.transaction(async (trx) => {
+      const imageToUpdate = {
+        file_id: image.fileId,
+        image: image.image,
+        thumbnail: image.thumbnail,
+      };
+
+      // Get the old image_id from the database
+      const { imageId: oldImageId, blogId } = await this.table
+        .first('image_id', 'id as blog_id')
+        .where('user_id', userId)
+        .transacting(trx);
+
+      console.log(oldImageId, blogId);
+
+      // if the image_id's do not match then insert the image
+      if (oldImageId !== image.fileId) {
+        await ImageModel.insert(trx, imageToUpdate);
+      }
+
+      // Update the blog
+      await super.update(
+        trx,
+        blogId,
+        { title, description, image_id: image.fileId },
+        ['id']
+      );
+
+      if (oldImageId && oldImageId !== image.fileId) {
+        // If the image_id's do not match then delete the old image from imagekit and the database
+        imageKit.deleteFile(oldImageId, (error) => {
+          if (error) {
+            console.log('Error deleting image from imagekit', error);
+          }
+        });
+
+        await ImageModel.delete(trx, oldImageId);
+      }
+
+      // return updated blog
+      const blog = await super.findById(blogId, trx);
+      return blog;
+    });
+    return results;
+  }
+
   static async getSuggestions(searchParams) {
     if (!searchParams) {
       throw new Error('Search params not defined!');
@@ -110,10 +165,6 @@ class BlogModel extends Model {
     if (!query) {
       throw new Error('Query not defined!');
     }
-
-    console.log('limit', limit);
-    console.log('beforeRank', beforeRank);
-    console.log('beforeId', beforeId);
 
     BlogModel.resultOrder[0].column = 'rank';
     BlogModel.userId = userId;
@@ -150,6 +201,8 @@ class BlogModel extends Model {
     limit
   ) {
     BlogModel.userId = userId;
+    BlogModel.resultOrder[0].column = 'fts_blog.created_at';
+
     const nextPage = [
       {
         column: 'created_at',

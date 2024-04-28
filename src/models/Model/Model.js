@@ -17,31 +17,64 @@ class Model {
     return knex(this.tableName);
   }
 
+  static get view() {
+    if (!this.materializedView) {
+      return knex(this.tableName);
+    }
+
+    return knex(this.materializedView);
+  }
+
   static all() {
     return this.table;
   }
 
-  static async search(searchTerms) {
-    await knex.transaction(async (trx) => {
-      const queryBuilder = this.table
-        .limit(10)
-        .orderBy('created_at', 'desc')
-        .orderBy('id', 'desc');
-    });
-  }
+  static async insert(trx, data, returning = '*') {
+    const queryBuilder = this.table
+      .transacting(trx)
+      .insert(data)
+      .returning(returning);
 
-  static async insert(data) {
-    const [result] = await this.table.insert(data).returning('*');
+    const [result] = await queryBuilder;
+
     return result;
   }
 
-  static async update(id, data) {
-    const [result] = await this.table.where({ id }).update(data).returning('*');
+  static async update(trx, id, data, returning = '*') {
+    const queryBuilder = this.table
+      .transacting(trx)
+      .where({ id })
+      .update(data)
+      .returning(returning);
+
+    const [result] = await queryBuilder;
+
     return result;
   }
 
-  static async findById(id) {
-    const result = await this.table.where({ id }).first();
+  static async findById(id, transaction) {
+    const queryBuilder = this.view.where({ id });
+
+    if (this.relations) {
+      for (const relation of this.relations) {
+        queryBuilder.modify(Builder.join, relation);
+      }
+    }
+
+    let result;
+
+    if (!transaction) {
+      result = await knex.transaction(async (trx) => {
+        return await queryBuilder
+          .transacting(trx)
+          .first(this.selectableProps || '*');
+      });
+    } else {
+      [result] = await queryBuilder
+        .transacting(transaction)
+        .select(this.selectableProps || '*');
+    }
+
     return result;
   }
 
@@ -50,9 +83,16 @@ class Model {
     return result;
   }
 
+  static async deleteById(trx, id, columnName = 'id') {
+    await this.table
+      .transacting(trx)
+      .where({ [columnName]: id })
+      .del();
+  }
+
   static async list(page, limit, search) {
     const list = await knex.transaction(async (trx) => {
-      const queryBuilder = this.table.transacting(trx);
+      const queryBuilder = this.view.transacting(trx);
 
       if (page) {
         queryBuilder.modify(Builder.nextPage, page);
