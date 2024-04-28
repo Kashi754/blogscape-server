@@ -29,31 +29,64 @@ class Model {
     return this.table;
   }
 
-  static async insert(trx, data, returning = '*') {
-    const queryBuilder = this.table
-      .transacting(trx)
-      .insert(data)
-      .returning(returning);
+  static async insert(data, returning = '*', transaction) {
+    const queryBuilder = this.table.insert(data).returning(returning);
 
-    const [result] = await queryBuilder;
+    let result;
+
+    if (!transaction) {
+      result = await knex.transaction(async (trx) => {
+        return await queryBuilder.transacting(trx);
+      });
+    } else {
+      result = await queryBuilder.transacting(transaction);
+    }
 
     return result;
   }
 
-  static async update(trx, id, data, returning = '*') {
+  static async delete(where, returning = '*', transaction) {
+    const queryBuilder = this.table;
+
+    if (!(where instanceof Array)) {
+      queryBuilder.modify(Builder.where, where);
+    } else {
+      for (const whereValue of where) {
+        queryBuilder.modify(Builder.where, whereValue);
+      }
+    }
+
+    let result;
+
+    if (!transaction) {
+      result = await knex.transaction(async (trx) => {
+        return await queryBuilder.del(returning).transacting(trx);
+      });
+    } else {
+      result = await queryBuilder.del(returning).transacting(transaction);
+    }
+    return result;
+  }
+
+  static async update(id, data, returning = '*', transaction) {
     const queryBuilder = this.table
-      .transacting(trx)
       .where({ id })
       .update(data)
       .returning(returning);
 
-    const [result] = await queryBuilder;
-
+    let result;
+    if (!transaction) {
+      result = await knex.transaction(async (trx) => {
+        return await queryBuilder.transacting(trx);
+      });
+    } else {
+      result = await queryBuilder.transacting(transaction);
+    }
     return result;
   }
 
-  static async findById(id, transaction) {
-    const queryBuilder = this.view.where({ id });
+  static async findBy(query, transaction) {
+    const queryBuilder = this.view.modify(Builder.where, query);
 
     if (this.relations) {
       for (const relation of this.relations) {
@@ -67,10 +100,10 @@ class Model {
       result = await knex.transaction(async (trx) => {
         return await queryBuilder
           .transacting(trx)
-          .first(this.selectableProps || '*');
+          .select(this.selectableProps || '*');
       });
     } else {
-      [result] = await queryBuilder
+      result = await queryBuilder
         .transacting(transaction)
         .select(this.selectableProps || '*');
     }
@@ -78,19 +111,7 @@ class Model {
     return result;
   }
 
-  static async findBy(data) {
-    const result = await this.table.where(data).first();
-    return result;
-  }
-
-  static async deleteById(trx, id, columnName = 'id') {
-    await this.table
-      .transacting(trx)
-      .where({ [columnName]: id })
-      .del();
-  }
-
-  static async list(page, limit, search) {
+  static async list(page, limit, search, order) {
     const list = await knex.transaction(async (trx) => {
       const queryBuilder = this.view.transacting(trx);
 
@@ -103,7 +124,7 @@ class Model {
       }
 
       if (this.resultOrder) {
-        queryBuilder.modify(Builder.orderBy, this.resultOrder);
+        queryBuilder.modify(Builder.orderBy, order || this.resultOrder);
       }
 
       if (limit || this.resultLimit) {

@@ -2,7 +2,6 @@ const Model = require('./Model/Model');
 const FollowersModel = require('./BlogFollowersModel');
 const ImageModel = require('./ImageModel');
 const knex = require('../database');
-const axios = require('axios');
 const { imageKit } = require('../config/imageKit');
 require('dotenv').config();
 
@@ -31,7 +30,7 @@ class BlogModel extends Model {
     'fts_blog.thumbnail as thumbnail',
     'fts_blog.file_id as file_id',
     'fts_blog.created_at as created_at',
-    'blog_followers.followers',
+    knex.raw('coalesce(blog_followers.followers, 0) as followers'),
     knex.raw(
       `
         CASE
@@ -63,6 +62,7 @@ class BlogModel extends Model {
   ];
 
   static set userId(id) {
+    this._userId = id;
     this.relations[1].join.andTo = id;
   }
 
@@ -89,6 +89,113 @@ class BlogModel extends Model {
     });
   }
 
+  static async getSuggestions(searchParams) {
+    if (!searchParams) {
+      throw new Error('Search params not defined!');
+    }
+    return await knex.transaction(async (trx) => {
+      return await knex('fts_blog_words as v')
+        .transacting(trx)
+        .whereRaw('v.word % :query', { query: searchParams })
+        .orderByRaw('v.word <-> :query', { query: searchParams })
+        .select([
+          'v.word as word',
+          knex.raw(`similarity(v.word, :query) AS similarity`, {
+            query: searchParams,
+          }),
+        ]);
+    });
+  }
+
+  static async findBy(userId, query, trx) {
+    BlogModel.userId = userId;
+
+    const result = await super.findBy(query, trx);
+
+    return result;
+  }
+
+  static async search(
+    userId,
+    query,
+    beforeRank = '999999999',
+    beforeId = '999999999',
+    limit
+  ) {
+    if (!query) {
+      throw new Error('Query not defined!');
+    }
+
+    BlogModel.userId = userId;
+
+    const resultOrder = {
+      column: 'rank',
+      direction: 'desc',
+    };
+
+    const nextPage = [
+      {
+        column: knex.raw(
+          `
+          ts_rank_cd(search, websearch_to_tsquery(:query)) +
+          ts_rank_cd(search, websearch_to_tsquery('simple',:query)) +
+          ts_rank_cd(search, websearch_to_tsquery('english',:query))
+          `,
+          { query: query }
+        ),
+        value: beforeRank,
+      },
+      {
+        column: 'fts_blog.id',
+        value: beforeId,
+      },
+    ];
+
+    return await super.list(
+      nextPage,
+      limit,
+      {
+        columns: ['search'],
+        query,
+        searchProps: this.addSearchColumn(query),
+      },
+      null,
+      resultOrder
+    );
+  }
+
+  static async list(
+    userId,
+    beforeDate = 'infinity',
+    beforeId = '999999999',
+    limit
+  ) {
+    BlogModel.userId = userId;
+
+    const nextPage = [
+      {
+        column: 'created_at',
+        value: beforeDate,
+      },
+      {
+        column: 'fts_blog.id',
+        value: beforeId,
+      },
+    ];
+    return await super.list(nextPage, limit);
+  }
+
+  static async listPopular(userId, limit) {
+    BlogModel.userId = userId;
+
+    const resultOrder = {
+      column: 'followers',
+      direction: 'desc',
+    };
+
+    return await super.list(null, limit, null, resultOrder);
+  }
+
   static async update(userId, { title, description, ...image }) {
     BlogModel.userId = userId;
     const results = await knex.transaction(async (trx) => {
@@ -103,8 +210,6 @@ class BlogModel extends Model {
         .first('image_id', 'id as blog_id')
         .where('user_id', userId)
         .transacting(trx);
-
-      console.log(oldImageId, blogId);
 
       // if the image_id's do not match then insert the image
       if (oldImageId !== image.fileId) {
@@ -131,89 +236,18 @@ class BlogModel extends Model {
       }
 
       // return updated blog
-      const blog = await super.findById(blogId, trx);
+      const blog = await this.findById(
+        userId,
+        {
+          column: 'id',
+          operator: '=',
+          value: blogId,
+        },
+        trx
+      );
       return blog;
     });
     return results;
-  }
-
-  static async getSuggestions(searchParams) {
-    if (!searchParams) {
-      throw new Error('Search params not defined!');
-    }
-    return await knex.transaction(async (trx) => {
-      return await knex('fts_blog_words as v')
-        .transacting(trx)
-        .whereRaw('v.word % :query', { query: searchParams })
-        .orderByRaw('v.word <-> :query', { query: searchParams })
-        .select([
-          'v.word as word',
-          knex.raw(`similarity(v.word, :query) AS similarity`, {
-            query: searchParams,
-          }),
-        ]);
-    });
-  }
-
-  static async search(
-    userId,
-    query,
-    beforeRank = '999999999',
-    beforeId = '999999999',
-    limit
-  ) {
-    if (!query) {
-      throw new Error('Query not defined!');
-    }
-
-    BlogModel.resultOrder[0].column = 'rank';
-    BlogModel.userId = userId;
-
-    const nextPage = [
-      {
-        column: knex.raw(
-          `
-          ts_rank_cd(search, websearch_to_tsquery(:query)) +
-          ts_rank_cd(search, websearch_to_tsquery('simple',:query)) +
-          ts_rank_cd(search, websearch_to_tsquery('english',:query))
-        `,
-          { query: query }
-        ),
-        value: beforeRank,
-      },
-      {
-        column: 'fts_blog.id',
-        value: beforeId,
-      },
-    ];
-
-    return await super.list(nextPage, limit, {
-      columns: ['search'],
-      query,
-      searchProps: this.addSearchColumn(query),
-    });
-  }
-
-  static async list(
-    userId,
-    beforeDate = 'infinity',
-    beforeId = '999999999',
-    limit
-  ) {
-    BlogModel.userId = userId;
-    BlogModel.resultOrder[0].column = 'fts_blog.created_at';
-
-    const nextPage = [
-      {
-        column: 'created_at',
-        value: beforeDate,
-      },
-      {
-        column: 'fts_blog.id',
-        value: beforeId,
-      },
-    ];
-    return await super.list(nextPage, limit);
   }
 }
 

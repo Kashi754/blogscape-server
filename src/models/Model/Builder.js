@@ -36,6 +36,21 @@ class Builder {
     }
   }
 
+  static where(builder, query) {
+    const { or } = query;
+
+    // Builder function is constructed in the form of
+    //"<boolean>where/Where<type>" ex. boolean = 'or', type = 'NotNull'
+    // results in "orWhereNotNull"
+    const where = or ? `${or}Where` : 'where';
+    if (query.type) {
+      builder[where + query.type](query.column, query.value);
+      return;
+    } else {
+      builder[where](query.column, query.operator, query.value);
+    }
+  }
+
   static orderBy(builder, resultOrder) {
     if (resultOrder instanceof Array) {
       for (const param of resultOrder) {

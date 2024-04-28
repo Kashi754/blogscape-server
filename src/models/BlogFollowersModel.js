@@ -13,6 +13,43 @@ class BlogFollowersModel extends Model {
       .groupBy('blog_id')
       .as('blog_followers');
   }
+
+  static async followBlog(userId, blogIds) {
+    const response = await knex.transaction(async (trx) => {
+      const blogs = await knex('blog')
+        .whereIn('id', blogIds)
+        .transacting(trx)
+        .select('id');
+
+      if (blogs.length !== blogIds.length) {
+        const error = new Error('One or more blogs not found');
+        error.status = 404;
+        throw error;
+      }
+
+      return await super.insert(
+        blogIds.map((id) => ({ blog_id: id, user_id: userId })),
+        null,
+        trx
+      );
+    });
+    return response;
+  }
+
+  static async unFollowBlog(userId, blogIds) {
+    return await super.delete([
+      {
+        column: 'blog_id',
+        operator: 'in',
+        value: blogIds,
+      },
+      {
+        column: 'user_id',
+        operator: '=',
+        value: userId,
+      },
+    ]);
+  }
 }
 
 module.exports = BlogFollowersModel;
