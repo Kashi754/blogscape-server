@@ -1,30 +1,30 @@
-const Model = require('./Model');
+const Model = require('./Model/Model');
 const FollowersModel = require('./BlogFollowersModel');
 const knex = require('../database');
 
 const defaultBlogData = {};
 
 class BlogModel extends Model {
-  static tableName = 'blog';
+  static tableName = 'fts_blog';
   static resultLimit = 10;
   static resultOrder = [
     {
-      column: 'blog.created_at',
+      column: 'fts_blog.created_at',
       direction: 'desc',
     },
     {
-      column: 'blog.id',
+      column: 'fts_blog.id',
       direction: 'desc',
     },
   ];
   static selectableProps = [
-    'blog.id as id',
-    'blog.title as title',
-    'blog.description as description',
-    'users.display_name as author',
-    'blog.image_id as image_id',
-    'blog.created_at as created_at',
-    'followers',
+    'fts_blog.id as id',
+    'fts_blog.title as title',
+    'fts_blog.description as description',
+    'fts_blog.author as author',
+    'fts_blog.image_id as image_id',
+    'fts_blog.created_at as created_at',
+    'blog_followers.followers',
     knex.raw(
       `
         CASE
@@ -36,18 +36,10 @@ class BlogModel extends Model {
   ];
   static relations = [
     {
-      modelClass: 'users',
-      join: {
-        type: 'join',
-        from: 'blog.user_id',
-        to: 'users.id',
-      },
-    },
-    {
-      modelClass: FollowersModel.countFollowers,
+      modelClass: FollowersModel.countFollowers('followers'),
       join: {
         type: 'leftOuter',
-        from: 'blog.id',
+        from: 'fts_blog.id',
         to: 'blog_followers.blog_id',
       },
     },
@@ -55,7 +47,7 @@ class BlogModel extends Model {
       modelClass: 'blog_following',
       join: {
         type: 'leftOuter',
-        from: 'blog.id',
+        from: 'fts_blog.id',
         to: 'blog_following.blog_id',
         andFrom: 'blog_following.user_id',
         andTo: this.userId,
@@ -64,11 +56,23 @@ class BlogModel extends Model {
   ];
 
   static set userId(id) {
-    this.relations[2].join.andTo = id;
+    this.relations[1].join.andTo = id;
   }
 
   static get userId() {
     return this._userId;
+  }
+
+  static addSearchColumn(query) {
+    return knex.raw(
+      `
+      ts_rank_cd(search, websearch_to_tsquery(:query)) +
+      ts_rank_cd(search, websearch_to_tsquery('simple',:query)) +
+      ts_rank_cd(search, websearch_to_tsquery('english',:query))
+      AS rank
+    `,
+      { query: query }
+    );
   }
 
   static async create(data) {
@@ -78,79 +82,85 @@ class BlogModel extends Model {
     });
   }
 
-  static async search(searchParams, userId) {
-    const blogs = await super.transaction(async (trx) => {
-      // Initialize the query
-
-      const queryBuilder = super.table
-        .limit(10)
-        .orderBy('created_at', 'desc')
-        .orderBy('id', 'desc');
-
-      // Add the search terms
-      if (searchParams) {
-        console.log(searchParams);
-        const whereBuilder = (builder, param) =>
-          builder
-            .whereILike('title', `%${param}%`)
-            .orWhereILike('description', `%${param}%`);
-
-        for (let i = 0; i < searchParams.length; i++) {
-          const param = searchParams[i];
-          if (i === 0) {
-            queryBuilder.where((builder) => whereBuilder(builder, param));
-          } else {
-            queryBuilder.orWhere((builder) => whereBuilder(builder, param));
-          }
-        }
-      }
-
-      const blogFollowerCount = knex
-        .select('blog_id')
-        .count('user_id as followers')
-        .from('blog_following')
-        .groupBy('blog_id')
-        .as('blog_followers');
-
-      // Order the results and select the required fields
-      const result = await queryBuilder
-        .limit(10)
-        .join('users', 'blog.user_id', 'users.id')
-        .leftJoin(blogFollowerCount, 'blog_followers.blog_id', 'blog.id')
-        .orderBy('created_at', 'desc')
-        .orderBy('id', 'desc')
-        .select(
-          'blog.id as id',
-          'blog.title as title',
-          'blog.description as description',
-          'users.display_name as author',
-          'blog.image_id as image_id',
-          'blog.created_at as created_at',
-          'followers'
-        )
-        .transacting(trx);
-
-      // Check if the user is following the blog
-      for (let blog of result) {
-        const following = await knex('blog_following')
-          .where('blog_id', blog.id)
-          .andWhere('user_id', userId)
-          .first()
-          .transacting(trx);
-
-        blog.following = following ? true : false;
-      }
-
-      return result;
+  static async getSuggestions(searchParams) {
+    if (!searchParams) {
+      throw new Error('Search params not defined!');
+    }
+    return await knex.transaction(async (trx) => {
+      return await knex('fts_blog_words as v')
+        .transacting(trx)
+        .whereRaw('v.word % :query', { query: searchParams })
+        .orderByRaw('v.word <-> :query', { query: searchParams })
+        .select([
+          'v.word as word',
+          knex.raw(`similarity(v.word, :query) AS similarity`, {
+            query: searchParams,
+          }),
+        ]);
     });
-
-    // Return the results
-    return blogs;
   }
 
-  static async list(userId, nextPage = null) {
+  static async search(
+    userId,
+    query,
+    beforeRank = '999999999',
+    beforeId = '999999999',
+    limit
+  ) {
+    if (!query) {
+      throw new Error('Query not defined!');
+    }
+
+    console.log('limit', limit);
+    console.log('beforeRank', beforeRank);
+    console.log('beforeId', beforeId);
+
+    BlogModel.resultOrder[0].column = 'rank';
     BlogModel.userId = userId;
-    return await super.list(nextPage);
+
+    const nextPage = [
+      {
+        column: knex.raw(
+          `
+          ts_rank_cd(search, websearch_to_tsquery(:query)) +
+          ts_rank_cd(search, websearch_to_tsquery('simple',:query)) +
+          ts_rank_cd(search, websearch_to_tsquery('english',:query))
+        `,
+          { query: query }
+        ),
+        value: beforeRank,
+      },
+      {
+        column: 'fts_blog.id',
+        value: beforeId,
+      },
+    ];
+
+    return await super.list(nextPage, limit, {
+      columns: ['search'],
+      query,
+      searchProps: this.addSearchColumn(query),
+    });
+  }
+
+  static async list(
+    userId,
+    beforeDate = 'infinity',
+    beforeId = '999999999',
+    limit
+  ) {
+    BlogModel.userId = userId;
+    const nextPage = [
+      {
+        column: 'created_at',
+        value: beforeDate,
+      },
+      {
+        column: 'fts_blog.id',
+        value: beforeId,
+      },
+    ];
+    return await super.list(nextPage, limit);
   }
 }
 

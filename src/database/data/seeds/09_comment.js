@@ -1,3 +1,5 @@
+const { userIds } = require('../seedUtilities/genUUID');
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -9,7 +11,7 @@ exports.seed = async function (knex) {
     // Post 1 comments
     {
       post_id: 1,
-      user_id: '2eec5b09-0cd6-436a-aeee-7933b0e26da7',
+      user_id: userIds[0],
       body: 'Wow, this is amazing!',
     },
     {
@@ -20,7 +22,7 @@ exports.seed = async function (knex) {
     },
     {
       post_id: 1,
-      user_id: 'df751170-1d53-46ca-89b6-b549fd62e0eb',
+      user_id: userIds[1],
       body: 'I hate it!',
     },
     {
@@ -32,7 +34,7 @@ exports.seed = async function (knex) {
     {
       post_id: 1,
       comment_id: 4,
-      user_id: 'df751170-1d53-46ca-89b6-b549fd62e0eb',
+      user_id: userIds[1],
       body: "Because it's just lorem ipsum!",
     },
     {

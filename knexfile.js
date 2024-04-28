@@ -23,7 +23,7 @@ module.exports = {
       directory: './src/database/data/seeds',
     },
     searchPath: ['public'],
-    postProcessResponse: (result) => {
+    postProcessResponse: (result, queryContext) => {
       // TODO: add special case for raw results
       if (Array.isArray(result)) {
         return result.map((object) => convertToCamel(object));

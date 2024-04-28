@@ -5,6 +5,8 @@ const blogsController = require('../../controllers/blogsController');
 
 blogsRouter.get('/', blogsController.blogList);
 
+blogsRouter.get('/search', blogsController.blogSearch);
+
 blogsRouter.get('/popular', blogsController.blogPopularList);
 
 blogsRouter.get('/:id', blogsController.blogIdGet);

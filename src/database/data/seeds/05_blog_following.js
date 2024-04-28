@@ -1,3 +1,5 @@
+const { userIds } = require('../seedUtilities/genUUID');
+
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
@@ -16,15 +18,15 @@ exports.seed = async function (knex) {
     },
     {
       blog_id: 3,
-      user_id: '2eec5b09-0cd6-436a-aeee-7933b0e26da7',
+      user_id: userIds[0],
     },
     {
       blog_id: 1,
-      user_id: '2eec5b09-0cd6-436a-aeee-7933b0e26da7',
+      user_id: userIds[0],
     },
     {
       blog_id: 1,
-      user_id: 'df751170-1d53-46ca-89b6-b549fd62e0eb',
+      user_id: userIds[1],
     },
   ]);
 };
