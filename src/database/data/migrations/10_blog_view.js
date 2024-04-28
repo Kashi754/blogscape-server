@@ -32,9 +32,9 @@ const BLOG_WORDS_VIEW_CONFIGURATION = `
   CREATE MATERIALIZED VIEW fts_blog_words
   AS
   SELECT word FROM ts_stat(
-    'select to_tsvector(''simple'', fd.title) ||
+    'SELECT to_tsvector(''simple'', fd.title) ||
 			to_tsvector(''simple'', fd.description) ||
-			to_tsvector(''simple'', fd.author) vect
+			to_tsvector(''simple'', fd.author) as vect
 	  FROM	fts_blog fd'
   );
 `;
@@ -64,7 +64,7 @@ const REFRESH_BLOG_VIEW_TRIGGERS = `
   FOR EACH STATEMENT
   EXECUTE PROCEDURE refresh_fts_blog();
 
-  CREATE OR REPLACE TRIGGER refresh_fts_user_trigger
+  CREATE OR REPLACE TRIGGER refresh_fts_blog_user_trigger
   AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
   ON users
   FOR EACH STATEMENT
@@ -73,6 +73,12 @@ const REFRESH_BLOG_VIEW_TRIGGERS = `
   CREATE OR REPLACE TRIGGER refresh_fts_blog_following_trigger
   AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
   ON blog_following
+  FOR EACH STATEMENT
+  EXECUTE PROCEDURE refresh_fts_blog();
+
+  CREATE OR REPLACE TRIGGER refresh_fts_blog_image_trigger
+  AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
+  ON image
   FOR EACH STATEMENT
   EXECUTE PROCEDURE refresh_fts_blog();
 
@@ -108,8 +114,9 @@ const DROP_REFRESH_BLOG_VIEW_FUNCTION = `
 
 const DROP_BLOG_VIEW_TRIGGERS = `
   DROP TRIGGER IF EXISTS refresh_fts_blog_trigger ON blog;
-  DROP TRIGGER IF EXISTS refresh_fts_user_trigger ON users;
+  DROP TRIGGER IF EXISTS refresh_fts_blog_user_trigger ON users;
   DROP TRIGGER IF EXISTS refresh_fts_blog_following_trigger ON blog_following;
+  DROP TRIGGER IF EXISTS refresh_fts_blog_image_trigger ON image;
   DROP TRIGGER IF EXISTS refresh_fts_blog_words_blog_trigger ON blog;
   DROP TRIGGER IF EXISTS refresh_fts_blog_words_user_trigger ON users;
 `;
@@ -118,6 +125,7 @@ const DROP_BLOG_VIEW_INDEXES = `
   DROP INDEX IF EXISTS idx_blog_fts_search;
   DROP INDEX IF EXISTS idx_blog_created_at_id;
   DROP INDEX IF EXISTS idx_blog_words;
+  DROP INDEX IF EXISTS idx_blog_words_word;
 `;
 
 exports.up = function (knex) {

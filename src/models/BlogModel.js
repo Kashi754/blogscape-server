@@ -3,7 +3,6 @@ const FollowersModel = require('./BlogFollowersModel');
 const ImageModel = require('./ImageModel');
 const knex = require('../database');
 const { imageKit } = require('../config/imageKit');
-require('dotenv').config();
 
 const defaultBlogData = {};
 
