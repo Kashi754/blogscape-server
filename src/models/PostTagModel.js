@@ -1,5 +1,4 @@
 const Model = require('./Model/Model');
-const knex = require('../database');
 
 class PostTagModel extends Model {
   static tableName = 'post_tag';
