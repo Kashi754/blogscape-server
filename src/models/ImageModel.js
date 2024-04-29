@@ -12,7 +12,7 @@ class ImageModel extends Model {
   }
 
   static async delete(trx, imageId) {
-    await super.deleteBy(trx, imageId, 'file_id');
+    await super.delete(trx, { file_id: imageId });
   }
 }
 

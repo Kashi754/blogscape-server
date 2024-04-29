@@ -25,11 +25,23 @@ class Model {
     return knex(this.materializedView);
   }
 
+  static addSearchColumn(query) {
+    return knex.raw(
+      `
+      ts_rank_cd(search, websearch_to_tsquery(:query)) +
+      ts_rank_cd(search, websearch_to_tsquery('simple',:query)) +
+      ts_rank_cd(search, websearch_to_tsquery('english',:query))
+      AS rank
+    `,
+      { query: query }
+    );
+  }
+
   static all() {
     return this.table;
   }
 
-  static async insert(data, returning = '*', transaction) {
+  static async insert(transaction, data, returning = '*') {
     const queryBuilder = this.table.insert(data).returning(returning);
 
     let result;
@@ -45,7 +57,7 @@ class Model {
     return result;
   }
 
-  static async delete(where, returning = '*', transaction) {
+  static async delete(transaction, where, returning = '*') {
     const queryBuilder = this.table;
 
     if (!(where instanceof Array)) {
@@ -68,7 +80,7 @@ class Model {
     return result;
   }
 
-  static async update(id, data, returning = '*', transaction) {
+  static async update(transaction, id, data, returning = '*') {
     const queryBuilder = this.table
       .where({ id })
       .update(data)
@@ -85,7 +97,7 @@ class Model {
     return result;
   }
 
-  static async findBy(query, transaction) {
+  static async findBy(query, transaction, distinct) {
     const queryBuilder = this.view.modify(Builder.where, query);
 
     if (this.relations) {
@@ -95,6 +107,10 @@ class Model {
     }
 
     let result;
+
+    if (distinct) {
+      queryBuilder.distinctOn(distinct);
+    }
 
     if (!transaction) {
       result = await knex.transaction(async (trx) => {
@@ -123,7 +139,7 @@ class Model {
         queryBuilder.modify(Builder.search, search);
       }
 
-      if (this.resultOrder) {
+      if (order || this.resultOrder) {
         queryBuilder.modify(Builder.orderBy, order || this.resultOrder);
       }
 

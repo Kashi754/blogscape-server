@@ -14,7 +14,7 @@ const BLOG_VIEW_CONFIGURATION = `
     image.thumbnail as thumbnail,
     image.file_id as file_id,
     blog.created_at as created_at,
-    followers,
+    coalesce(blog_followers.followers, 0) as followers,
     setweight(to_tsvector('english', blog.title), 'A') ||
     setweight(to_tsvector('english', blog.description), 'B') ||
     setweight(to_tsvector('simple', users.display_name), 'A') AS search

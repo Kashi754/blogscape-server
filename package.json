@@ -10,6 +10,7 @@
     "migrate": "knex migrate:latest",
     "unmigrate": "knex migrate:rollback",
     "seed": "knex seed:run",
+    "reset": "knex migrate:rollback && knex migrate:latest && knex seed:run",
     "lint": "eslint ./",
     "lint-fix": "eslint ./ --fix"
   },

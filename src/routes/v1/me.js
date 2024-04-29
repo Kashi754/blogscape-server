@@ -4,6 +4,7 @@ const meRouter = express.Router();
 const meController = require('../../controllers/meController');
 const blogsController = require('../../controllers/blogsController');
 const blogFollowersController = require('../../controllers/blogFollowersController');
+const postsController = require('../../controllers/postsController');
 
 meRouter.put('/profile', meController.meUpdateProfile);
 
@@ -17,7 +18,7 @@ meRouter.get('/following', blogsController.getFollowedBlogs);
 
 meRouter.put('/following', blogFollowersController.changeFollowingStatus);
 
-meRouter.get('/posts', meController.mePostsList);
+meRouter.get('/posts', postsController.mePostsList);
 
 meRouter.put('/password', meController.meUpdatePassword);
 

@@ -28,16 +28,16 @@ class BlogFollowersModel extends Model {
       }
 
       return await super.insert(
+        trx,
         blogIds.map((id) => ({ blog_id: id, user_id: userId })),
-        null,
-        trx
+        null
       );
     });
     return response;
   }
 
   static async unFollowBlog(userId, blogIds) {
-    return await super.delete([
+    return await super.delete(null, [
       {
         column: 'blog_id',
         operator: 'in',

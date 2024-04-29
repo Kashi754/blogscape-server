@@ -19,8 +19,8 @@ exports.blogList = asyncHandler(async (req, res) => {
 exports.blogSearch = asyncHandler(async (req, res) => {
   const { q: query, beforeRank, beforeId, limit } = req.query;
 
-  if ((beforeRank && !beforeId) || (!beforeRank && beforeId)) {
-    return res.status(400).send('Both beforeRank and beforeId are required');
+  if ((beforeRank && !beforeId) || (!beforeRank && beforeId) || !query) {
+    return res.status(400).send('Please provide all required parameters');
   }
 
   const blogs = await BlogModel.search(
@@ -33,10 +33,10 @@ exports.blogSearch = asyncHandler(async (req, res) => {
 
   if (blogs.length === 0) {
     const suggestions = await BlogModel.getSuggestions(query);
-    res.status(404).send(suggestions);
-  } else {
-    res.send(blogs);
+    return res.status(404).send(suggestions);
   }
+
+  res.send(blogs);
 });
 
 exports.blogUpdate = asyncHandler(async (req, res) => {
@@ -51,7 +51,7 @@ exports.blogIdGet = asyncHandler(async (req, res) => {
     value: req.params.id,
   });
 
-  if (!blog) {
+  if (blog.length === 0) {
     return res.status(404).send(`Blog with id ${req.params.id} not found`);
   }
 

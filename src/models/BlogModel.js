@@ -29,7 +29,7 @@ class BlogModel extends Model {
     'fts_blog.thumbnail as thumbnail',
     'fts_blog.file_id as file_id',
     'fts_blog.created_at as created_at',
-    knex.raw('coalesce(blog_followers.followers, 0) as followers'),
+    'fts_blog.followers as followers',
     knex.raw(
       `
         CASE
@@ -40,14 +40,14 @@ class BlogModel extends Model {
     ),
   ];
   static relations = [
-    {
-      modelClass: FollowersModel.countFollowers('followers'),
-      join: {
-        type: 'leftOuter',
-        from: 'fts_blog.id',
-        to: 'blog_followers.blog_id',
-      },
-    },
+    // {
+    //   modelClass: FollowersModel.countFollowers('followers'),
+    //   join: {
+    //     type: 'leftOuter',
+    //     from: 'fts_blog.id',
+    //     to: 'blog_followers.blog_id',
+    //   },
+    // },
     {
       modelClass: 'blog_following',
       join: {
@@ -69,20 +69,8 @@ class BlogModel extends Model {
     return this._userId;
   }
 
-  static addSearchColumn(query) {
-    return knex.raw(
-      `
-      ts_rank_cd(search, websearch_to_tsquery(:query)) +
-      ts_rank_cd(search, websearch_to_tsquery('simple',:query)) +
-      ts_rank_cd(search, websearch_to_tsquery('english',:query))
-      AS rank
-    `,
-      { query: query }
-    );
-  }
-
   static async create(data) {
-    return await super.insert({
+    return await super.insert(null, {
       ...data,
       ...defaultBlogData,
     });
@@ -156,7 +144,7 @@ class BlogModel extends Model {
       {
         columns: ['search'],
         query,
-        searchProps: this.addSearchColumn(query),
+        searchProps: super.addSearchColumn(query),
       },
       null,
       resultOrder
@@ -235,7 +223,7 @@ class BlogModel extends Model {
       }
 
       // return updated blog
-      const blog = await this.findById(
+      const blog = await this.findBy(
         userId,
         {
           column: 'id',
@@ -244,7 +232,7 @@ class BlogModel extends Model {
         },
         trx
       );
-      return blog;
+      return blog[0];
     });
     return results;
   }
