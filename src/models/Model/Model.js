@@ -81,10 +81,13 @@ class Model {
   }
 
   static async update(transaction, id, data, returning = '*') {
-    const queryBuilder = this.table
-      .where({ id })
-      .update(data)
-      .returning(returning);
+    const queryBuilder = this.table.update(data).returning(returning);
+
+    if (id instanceof Object) {
+      queryBuilder.where(id);
+    } else {
+      queryBuilder.where({ id });
+    }
 
     let result;
     if (!transaction) {

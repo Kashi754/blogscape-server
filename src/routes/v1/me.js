@@ -1,14 +1,15 @@
 const express = require('express');
 
 const meRouter = express.Router();
-const meController = require('../../controllers/meController');
+const usersController = require('../../controllers/usersController');
 const blogsController = require('../../controllers/blogsController');
 const blogFollowersController = require('../../controllers/blogFollowersController');
 const postsController = require('../../controllers/postsController');
+const socialMediaController = require('../../controllers/socialMediaController');
 
-meRouter.put('/profile', meController.meUpdateProfile);
+meRouter.put('/profile', usersController.meUpdateProfile);
 
-meRouter.put('/social-media', meController.meUpdateSocials);
+meRouter.put('/social-media', socialMediaController.meUpdateSocials);
 
 meRouter.get('/blog', blogsController.meBlogGet);
 
@@ -20,6 +21,6 @@ meRouter.put('/following', blogFollowersController.changeFollowingStatus);
 
 meRouter.get('/posts', postsController.mePostsList);
 
-meRouter.put('/password', meController.meUpdatePassword);
+meRouter.put('/password', usersController.meUpdatePassword);
 
 module.exports = meRouter;
