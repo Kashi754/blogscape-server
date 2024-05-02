@@ -1,8 +1,7 @@
 const express = require('express');
 
 const postsRouter = express.Router();
-const postsController = require('../../controllers/postsController');
-const commentsController = require('../../controllers/commentsController');
+const { postsController, commentsController } = require('../../controllers');
 
 postsRouter.get('/', postsController.postsList);
 

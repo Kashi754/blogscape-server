@@ -1,3 +1,4 @@
+const knex = require('../database');
 const Model = require('./Model/Model');
 
 class SocialMediaModel extends Model {
@@ -22,6 +23,19 @@ class SocialMediaModel extends Model {
     'twitch',
     'discord',
   ];
+
+  static socialMediaJSON = knex.raw(`
+    json_build_object(
+      'facebook', social_media.facebook,
+      'twitter', social_media.twitter,
+      'instagram', social_media.instagram,
+      'tiktok', social_media.tiktok,
+      'youtube', social_media.youtube,
+      'github', social_media.github,
+      'twitch', social_media.twitch,
+      'discord', social_media.discord
+    ) as social_media
+  `);
 }
 
 module.exports = SocialMediaModel;

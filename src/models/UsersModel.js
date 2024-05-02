@@ -1,6 +1,8 @@
+const { imageKit } = require('../config/imageKit');
 const knex = require('../database');
 const ImageModel = require('./ImageModel');
 const Model = require('./Model/Model');
+const SocialMediaModel = require('./SocialMediaModel');
 
 class UsersModel extends Model {
   static tableName = 'users';
@@ -27,18 +29,7 @@ class UsersModel extends Model {
     'image.file_id as fileId',
     'image.image as image',
     'image.thumbnail as thumbnail',
-    knex.raw(`
-      json_build_object(
-        'facebook', social_media.facebook,
-        'twitter', social_media.twitter,
-        'instagram', social_media.instagram,
-        'tiktok', social_media.tiktok,
-        'youtube', social_media.youtube,
-        'github', social_media.github,
-        'twitch', social_media.twitch,
-        'discord', social_media.discord
-      ) as social_media
-    `),
+    SocialMediaModel.socialMediaJSON,
   ];
 
   static relations = [
@@ -59,6 +50,42 @@ class UsersModel extends Model {
       },
     },
   ];
+
+  static userCommentJSON = knex.raw(`
+    json_build_object(
+      'id', users.id,
+      'display_name', users.display_name,
+      'thumbnail', image.thumbnail
+    ) as user
+  `);
+
+  static async create(data) {
+    const results = await knex.transaction(async (trx) => {
+      const { blogTitle, ...user } = data;
+      try {
+        const userResults = await super.insert(trx, user, 'id');
+        const userId = userResults[0].id;
+
+        const blogResults = await knex('blog')
+          .transacting(trx)
+          .insert({
+            title: blogTitle,
+            user_id: userId[0].id,
+          })
+          .returning('id');
+
+        const blogId = blogResults[0].id;
+
+        return {
+          userId,
+          blogId,
+        };
+      } catch (err) {
+        return null;
+      }
+    });
+    return results;
+  }
 
   static async update(userId, data) {
     const results = await knex.transaction(async (trx) => {
@@ -92,6 +119,16 @@ class UsersModel extends Model {
         ['id']
       );
 
+      if (oldImageId && oldImageId !== data.fileId) {
+        // If the image_id's do not match then delete the old image from imagekit and the database
+        imageKit.deleteFile(oldImageId, (error) => {
+          if (error) {
+            console.error('Error deleting image from imagekit', error);
+          }
+        });
+        await ImageModel.delete(trx, oldImageId);
+      }
+
       const updatedUser = await super.findBy(
         {
           column: 'users.id',
@@ -105,6 +142,24 @@ class UsersModel extends Model {
     });
 
     return results;
+  }
+
+  static async getUserLogin(username) {
+    const user = knex.transaction(async (trx) => {
+      const result = await this.table
+        .transacting(trx)
+        .join('blog', 'users.id', '=', 'blog.user_id')
+        .where('users.username', username)
+        .first(
+          'users.id as id',
+          'users.password_hash as password_hash',
+          'blog.id as blog_id'
+        );
+
+      return result;
+    });
+
+    return user;
   }
 }
 

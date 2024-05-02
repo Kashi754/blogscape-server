@@ -48,8 +48,6 @@ class PostTagModel extends Model {
 
     if (nonExistentTags.length > 0) {
       const error = new Error('One or more tags not found');
-      console.log('nonExistentTags: ', nonExistentTags);
-      console.log('existingTags: ', existingTags);
       error.status = 404;
       throw error;
     }

@@ -39,7 +39,7 @@ exports.blogSearch = asyncHandler(async (req, res) => {
   res.send(blogs);
 });
 
-exports.blogUpdate = asyncHandler(async (req, res) => {
+exports.meBlogUpdate = asyncHandler(async (req, res) => {
   const updatedBlog = await BlogModel.update(userId, req.body);
   res.send(updatedBlog);
 });

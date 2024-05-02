@@ -1,5 +1,4 @@
 const Model = require('./Model/Model');
-const FollowersModel = require('./BlogFollowersModel');
 const ImageModel = require('./ImageModel');
 const knex = require('../database');
 const { imageKit } = require('../config/imageKit');
@@ -40,14 +39,6 @@ class BlogModel extends Model {
     ),
   ];
   static relations = [
-    // {
-    //   modelClass: FollowersModel.countFollowers('followers'),
-    //   join: {
-    //     type: 'leftOuter',
-    //     from: 'fts_blog.id',
-    //     to: 'blog_followers.blog_id',
-    //   },
-    // },
     {
       modelClass: 'blog_following',
       join: {
@@ -62,7 +53,7 @@ class BlogModel extends Model {
 
   static set userId(id) {
     this._userId = id;
-    this.relations[1].join.andTo = id;
+    this.relations[0].join.andTo = id;
   }
 
   static get userId() {
@@ -215,7 +206,7 @@ class BlogModel extends Model {
         // If the image_id's do not match then delete the old image from imagekit and the database
         imageKit.deleteFile(oldImageId, (error) => {
           if (error) {
-            console.log('Error deleting image from imagekit', error);
+            console.error('Error deleting image from imagekit', error);
           }
         });
 

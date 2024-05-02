@@ -184,6 +184,17 @@ class PostModel extends Model {
         ['id']
       );
 
+      if (oldImageId && oldImageId !== data.fileId) {
+        // If the image_id's do not match then delete the old image from imagekit and the database
+        imageKit.deleteFile(oldImageId, (error) => {
+          if (error) {
+            console.error('Error deleting image from imagekit', error);
+          }
+        });
+
+        await ImageModel.delete(trx, oldImageId);
+      }
+
       const updatedPost = await super.findBy(
         {
           column: 'id',

@@ -2,18 +2,18 @@
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 
-require('dotenv').config();
 const { convertToCamel } = require('./src/utilities');
+const config = require('./src/config/environment');
 
 module.exports = {
   development: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.name,
     },
     pool: { min: 0, max: 7 },
     migrations: {
@@ -36,11 +36,11 @@ module.exports = {
   testing: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.name,
     },
     pool: { min: 0, max: 7 },
     migrations: {
@@ -63,11 +63,11 @@ module.exports = {
   production: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: config.db.host,
+      port: config.db.port,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.name,
     },
     pool: { min: 0, max: 7 },
     migrations: {

@@ -1,6 +1,7 @@
 const Builder = require('./Model/Builder');
 const Model = require('./Model/Model');
 const knex = require('../database');
+const UsersModel = require('./UsersModel');
 
 class CommentModel extends Model {
   static tableName = 'comment';
@@ -20,13 +21,7 @@ class CommentModel extends Model {
     'comment.id as id',
     'comment.post_id as post_id',
     'comment.comment_id as comment_id',
-    knex.raw(`
-    json_build_object(
-      'id', users.id,
-      'display_name', users.display_name,
-      'thumbnail', image.thumbnail
-    ) as user
-    `),
+    UsersModel.userCommentJSON,
     'comment.body as body',
     'comment.created_at as created_at',
     'replies.reply_count',

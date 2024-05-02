@@ -1,15 +1,16 @@
 const express = require('express');
 const ImageKit = require('imagekit');
+const { checkAuthenticated } = require('../../middleware/auth');
 
 const v1Router = express.Router();
 
 v1Router.use('/auth', require('./auth'));
-v1Router.use('/blogs', require('./blogs'));
-v1Router.use('/users', require('./users'));
-v1Router.use('/me', require('./me'));
-v1Router.use('/posts', require('./posts'));
-v1Router.use('/tags', require('./tags'));
-v1Router.get('/secret', (req, res) => {
+v1Router.use('/blogs', checkAuthenticated, require('./blogs'));
+v1Router.use('/users', checkAuthenticated, require('./users'));
+v1Router.use('/me', checkAuthenticated, require('./me'));
+v1Router.use('/posts', checkAuthenticated, require('./posts'));
+v1Router.use('/tags', checkAuthenticated, require('./tags'));
+v1Router.get('/secret', checkAuthenticated, (req, res) => {
   const imageKit = new ImageKit({
     publicKey: 'public_iILFPVBo5QbfK+36qOvA8VwUEzk=',
     privateKey: 'private_sJZIRCeXbZhjCPoTcFYloIhq6PY=',
