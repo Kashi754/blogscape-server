@@ -68,7 +68,7 @@ exports.authLogoutPost = (req, res, next) => {
       return next(err);
     }
     res.clearCookie('connect.sid');
-    res.redirect('/login');
+    res.status(201).send();
   });
 };
 
