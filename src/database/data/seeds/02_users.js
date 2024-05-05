@@ -11,7 +11,7 @@ exports.seed = async function (knex) {
     username: `testUser${index}`,
     email: `user${index}@gmail.com`,
     password_hash:
-      '$2b$10$JDjrJpbntlkKAdv4Mo4Zu.VwGAxO42VsM4cYy9d/31b0ftothXjFC',
+      '$2b$10$LYFpAAkIYDCY1UYFMSa5hOBge8NvwoDp/rtqGv3seHIe1hbPME6P2',
     display_name: `Test User ${index}`,
     website: 'https://www.kashi754.com',
     location: 'United States',
@@ -26,7 +26,7 @@ exports.seed = async function (knex) {
       username: 'kashi754',
       email: 'arigorn15@gmail.com',
       password_hash:
-        '$2b$10$JDjrJpbntlkKAdv4Mo4Zu.VwGAxO42VsM4cYy9d/31b0ftothXjFC',
+        '$2b$10$LYFpAAkIYDCY1UYFMSa5hOBge8NvwoDp/rtqGv3seHIe1hbPME6P2',
     },
     ...users,
   ]);

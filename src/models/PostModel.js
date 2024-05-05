@@ -125,14 +125,19 @@ class PostModel extends Model {
       },
     ];
 
-    return await super.list(nextPage, limit, {
+    return await super.list(null, nextPage, limit, {
       columns: ['search'],
       query,
       searchProps: super.addSearchColumn(query),
     });
   }
 
-  static async list(beforeDate = 'infinity', beforeId = '999999999', limit) {
+  static async list(
+    blogId,
+    beforeDate = 'infinity',
+    beforeId = '999999999',
+    limit
+  ) {
     const nextPage = [
       {
         column: 'created_at',
@@ -143,7 +148,19 @@ class PostModel extends Model {
         value: beforeId,
       },
     ];
-    return await super.list(nextPage, limit);
+
+    return await super.list(blogId, nextPage, limit);
+  }
+
+  static async findByBlogId(blogId) {
+    return await super.findBy(
+      {
+        column: 'blog_id',
+        value: blogId,
+        operator: '=',
+      },
+      null
+    );
   }
 
   static async update(loggedInBlogId, postId, data) {

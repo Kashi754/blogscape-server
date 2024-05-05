@@ -67,8 +67,6 @@ class CommentModel extends Model {
     const results = await knex.transaction(async (trx) => {
       const postId = await super.insert(trx, data, ['id']);
 
-      console.log(postId);
-
       const newComment = await super.findBy(
         {
           column: 'comment.id',

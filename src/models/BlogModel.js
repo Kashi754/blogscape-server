@@ -130,6 +130,7 @@ class BlogModel extends Model {
     ];
 
     return await super.list(
+      null,
       nextPage,
       limit,
       {
@@ -160,7 +161,7 @@ class BlogModel extends Model {
         value: beforeId,
       },
     ];
-    return await super.list(nextPage, limit);
+    return await super.list(null, nextPage, limit);
   }
 
   static async listPopular(userId, limit) {
@@ -171,7 +172,7 @@ class BlogModel extends Model {
       direction: 'desc',
     };
 
-    return await super.list(null, limit, null, resultOrder);
+    return await super.list(null, null, limit, null, resultOrder);
   }
 
   static async update(userId, { title, description, ...image }) {

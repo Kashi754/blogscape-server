@@ -1,8 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const CommentModel = require('../models/CommentModel');
 
-const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
-
 exports.commentsList = asyncHandler(async (req, res) => {
   const { commentId, beforeDate, beforeId, limit } = req.query;
   const postId = req.params.id;
@@ -27,7 +25,10 @@ exports.commentsList = asyncHandler(async (req, res) => {
 });
 
 exports.createComment = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const { commentId } = req.query;
+
+  console.log(req.body);
 
   const commentToAdd = {
     body: req.body.comment,

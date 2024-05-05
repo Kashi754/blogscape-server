@@ -7,7 +7,7 @@ const { authUser } = require('./src/config/passport');
 const config = require('./src/config/environment');
 const { rateLimiterBursty } = require('./src/middleware/rateLimiterBursty');
 const app = express();
-const knexSession = require('./src/config/session');
+const { knexSession } = require('./src/config/session');
 const PORT = config.port || 5000;
 
 if (config.env === 'development') {
@@ -21,13 +21,13 @@ app.use(
     origin: true,
     methods: ['GET', 'POST', 'PUT'],
     credentials: true,
-    optionsSuccessStatus: 204,
+    optionsSuccessStatus: 200,
+    preflightContinue: false,
   })
 );
 
-app.use(knexSession);
-
 // Passport Config
+app.use(knexSession);
 app.use(passport.initialize());
 app.use(passport.session());
 

@@ -20,24 +20,25 @@ class UsersModel extends Model {
 
   static selectableProps = [
     'users.id as id',
+    'blog.id as blog_id',
     'users.display_name as display_name',
     'users.username as user_name',
     'users.email as email',
     'users.website as website',
     'users.location as location',
     'users.location_code as location_code',
-    'image.file_id as fileId',
-    'image.image as image',
-    'image.thumbnail as thumbnail',
+    'user_image.file_id as fileId',
+    'user_image.image as image',
+    'user_image.thumbnail as thumbnail',
     SocialMediaModel.socialMediaJSON,
   ];
 
   static relations = [
     {
-      modelClass: 'image',
+      modelClass: 'image as user_image',
       join: {
         type: 'leftOuter',
-        from: 'image.file_id',
+        from: 'user_image.file_id',
         to: 'users.image_id',
       },
     },
@@ -46,6 +47,14 @@ class UsersModel extends Model {
       join: {
         type: 'leftOuter',
         from: 'social_media.user_id',
+        to: 'users.id',
+      },
+    },
+    {
+      modelClass: 'blog',
+      join: {
+        type: 'join',
+        from: 'blog.user_id',
         to: 'users.id',
       },
     },
@@ -90,10 +99,12 @@ class UsersModel extends Model {
   static async update(userId, data) {
     const results = await knex.transaction(async (trx) => {
       const imageToUpdate = {
-        file_id: data.fileId,
+        file_id: data.file_id,
         image: data.image,
         thumbnail: data.thumbnail,
       };
+
+      console.log(imageToUpdate);
 
       const { imageId: oldImageId } = await this.table
         .first('image_id')
@@ -152,6 +163,7 @@ class UsersModel extends Model {
         .where('users.username', username)
         .first(
           'users.id as id',
+          'users.display_name as display_name',
           'users.password_hash as password_hash',
           'blog.id as blog_id'
         );

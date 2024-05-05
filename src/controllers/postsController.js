@@ -2,16 +2,16 @@ const asyncHandler = require('express-async-handler');
 
 const PostModel = require('../models/PostModel');
 
-const blogId = 1;
-
 exports.postsList = asyncHandler(async (req, res) => {
-  const { beforeDate, beforeId, limit } = req.query;
+  const { blogId, beforeDate, beforeId, limit } = req.query;
 
   if ((beforeDate && !beforeId) || (!beforeDate && beforeId)) {
     return res.status(400).send('Both beforeDate and beforeId are required');
   }
 
-  const posts = await PostModel.list(beforeDate, beforeId, limit);
+  const blogIdQuery = blogId ? { blog_id: blogId } : null;
+
+  const posts = await PostModel.list(blogIdQuery, beforeDate, beforeId, limit);
 
   res.send(posts);
 });
@@ -66,7 +66,8 @@ exports.postsCreatePost = asyncHandler(async (req, res) => {
 });
 
 exports.mePostsList = asyncHandler(async (req, res) => {
-  const posts = await PostModel.findBy(blogId, {
+  const blogId = req.user.blogId;
+  const posts = await PostModel.findBy({
     column: 'blog_id',
     operator: '=',
     value: blogId,

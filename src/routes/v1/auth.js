@@ -1,8 +1,8 @@
 const express = require('express');
 const passport = require('passport');
-
+const { checkSchema } = require('express-validator');
 const authRouter = express.Router();
-const { authSchema } = require('../../validation/schema');
+const { authSchema } = require('../../utilities/validationSchemas');
 const { authController } = require('../../controllers');
 const { checkAuthenticated, checkLoggedIn } = require('../../middleware/auth');
 

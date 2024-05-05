@@ -2,9 +2,8 @@ const asyncHandler = require('express-async-handler');
 
 const BlogFollowersModel = require('../models/BlogFollowersModel');
 
-const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
-
 exports.changeFollowingStatus = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const { blogIds, following } = req.body;
 
   if (!blogIds || following === undefined) {

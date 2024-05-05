@@ -130,12 +130,22 @@ class Model {
     return result;
   }
 
-  static async list(page, limit, search, order) {
+  static async list(where, page, limit, search, order) {
     const list = await knex.transaction(async (trx) => {
       const queryBuilder = this.view.transacting(trx);
 
+      if (where) {
+        queryBuilder.where(where);
+      }
+
       if (page) {
-        queryBuilder.modify(Builder.nextPage, page);
+        if (typeof page === 'array') {
+          for (const param of page) {
+            queryBuilder.modify(Builder.nextPage, param);
+          }
+        } else {
+          queryBuilder.modify(Builder.nextPage, page);
+        }
       }
 
       if (search) {

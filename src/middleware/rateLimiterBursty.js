@@ -22,7 +22,7 @@ const burstyLimiter = new BurstyRateLimiter(
     duration: 10,
     storeClient: knex,
     storeType: 'knex',
-    inMemoryBlockOnConsumed: 5,
+    inMemoryBlockOnConsumed: 11,
     insuranceLimiter: new RateLimiterMemory({
       points: 10,
       duration: 10,
@@ -32,8 +32,8 @@ const burstyLimiter = new BurstyRateLimiter(
 
 exports.rateLimiterBursty = async (req, res, next) => {
   try {
-    const key = req.user.id ? req.user.id : req.ip;
-    const pointsToConsume = req.user.id ? 1 : 2;
+    const key = req.user?.id ? req.user.id : req.ip;
+    const pointsToConsume = req.user?.id ? 1 : 2;
 
     const rateLimiterRes = await burstyLimiter.consume(key, pointsToConsume);
 

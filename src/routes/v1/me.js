@@ -9,6 +9,7 @@ const {
   socialMediaController,
   meController,
 } = require('../../controllers');
+meRouter.get('/profile', usersController.meGetProfile);
 
 meRouter.put('/profile', usersController.meUpdateProfile);
 

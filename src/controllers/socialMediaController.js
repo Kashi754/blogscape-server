@@ -13,9 +13,8 @@ const socials = [
   'discord',
 ];
 
-const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
-
 exports.meUpdateSocials = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   for (const social of socials) {
     if (!Object.keys(req.body).includes(social)) {
       return res

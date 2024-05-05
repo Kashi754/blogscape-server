@@ -6,9 +6,11 @@ const {
   limiterSlowBruteByIP,
   getUsernameIPkey,
 } = require('../middleware/rateLimiterLogin');
+const { maxAge } = require('../config/session');
 
 exports.authLoginPost = asyncHandler(async (req, res) => {
   const usernameIPkey = getUsernameIPkey(req.body.username, req.ip);
+
   const resUsernameAndIP =
     await limiterConsecutiveFailsByUsernameAndIP.get(usernameIPkey);
 
@@ -17,10 +19,17 @@ exports.authLoginPost = asyncHandler(async (req, res) => {
     await limiterConsecutiveFailsByUsernameAndIP.delete(usernameIPkey);
   }
 
-  res.status(200).send(req.user);
+  const now = new Date();
+  const expiry = now.getTime() + maxAge;
+  res.send({
+    ...req.user,
+    expiry,
+    maxAge,
+  });
 });
 
 exports.authLoginFail = async (err, req, res, next) => {
+  console.log(err);
   try {
     const promises = [limiterSlowBruteByIP.consume(req.ip)];
     const user = await UsersModel.getUserLogin(req.body.username);
@@ -62,14 +71,15 @@ exports.authRegisterPost = asyncHandler(async (req, res, next) => {
 });
 
 exports.authLogoutPost = (req, res, next) => {
-  req.logout();
-  req.session.destroy((err) => {
+  console.log('Logging out');
+  req.logout((err) => {
     if (err) {
+      console.log('Error logging out', err);
       return next(err);
     }
-    res.clearCookie('connect.sid');
-    res.status(201).send();
   });
+  res.clearCookie('user');
+  res.status(201).send();
 };
 
 exports.getUserAuth = (username) => {

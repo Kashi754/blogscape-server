@@ -1,10 +1,10 @@
 const asyncHandler = require('express-async-handler');
 
 const BlogModel = require('../models/BlogModel');
-
-const userId = 'a007ec9f-5f75-419f-8369-5ab37d7e99e6';
+const PostModel = require('../models/PostModel');
 
 exports.blogList = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const { beforeDate, beforeId, limit } = req.query;
 
   if ((beforeDate && !beforeId) || (!beforeDate && beforeId)) {
@@ -17,6 +17,7 @@ exports.blogList = asyncHandler(async (req, res) => {
 });
 
 exports.blogSearch = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const { q: query, beforeRank, beforeId, limit } = req.query;
 
   if ((beforeRank && !beforeId) || (!beforeRank && beforeId) || !query) {
@@ -40,35 +41,43 @@ exports.blogSearch = asyncHandler(async (req, res) => {
 });
 
 exports.meBlogUpdate = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const updatedBlog = await BlogModel.update(userId, req.body);
   res.send(updatedBlog);
 });
 
 exports.blogIdGet = asyncHandler(async (req, res) => {
-  const blog = await BlogModel.findBy(userId, {
+  const userId = req.user.id;
+  const blogResults = await BlogModel.findBy(userId, {
     column: 'id',
     operator: '=',
     value: req.params.id,
   });
 
-  if (blog.length === 0) {
+  if (blogResults.length === 0) {
     return res.status(404).send(`Blog with id ${req.params.id} not found`);
   }
 
-  res.send(blog[0]);
+  const blog = blogResults[0];
+
+  res.send(blog);
 });
 
 exports.meBlogGet = asyncHandler(async (req, res) => {
-  const blog = await BlogModel.findBy(userId, {
+  const userId = req.user.id;
+  const blogResults = await BlogModel.findBy(userId, {
     column: 'user_id',
     operator: '=',
     value: userId,
   });
 
-  res.send(blog[0]);
+  const blog = blogResults[0];
+
+  res.send(blog);
 });
 
 exports.getFollowedBlogs = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const blogs = await BlogModel.findBy(userId, {
     column: 'blog_following.user_id',
     type: 'NotNull',
@@ -82,6 +91,7 @@ exports.getFollowedBlogs = asyncHandler(async (req, res) => {
 });
 
 exports.getPopularBlogs = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
   const blogs = await BlogModel.listPopular(userId, 10);
   res.send(blogs);
 });

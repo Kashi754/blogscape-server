@@ -5,11 +5,14 @@ const authController = require('../controllers/authController');
 exports.authUser = async (username, password, done) => {
   // TODO: Fetch user from database
   const user = await authController.getUserAuth(username);
-
   if (!user) {
     return done(null, false);
   }
 
+  const SALT_ROUNDS = 10;
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  const hash = await bcrypt.hash(password, salt);
+  console.log(hash);
   const matchedPassword = await bcrypt.compare(password, user.passwordHash);
 
   if (!matchedPassword) {
