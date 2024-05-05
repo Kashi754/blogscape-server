@@ -66,7 +66,7 @@ exports.blogIdGet = asyncHandler(async (req, res) => {
 exports.meBlogGet = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const blogResults = await BlogModel.findBy(userId, {
-    column: 'user_id',
+    column: 'fts_blog.user_id',
     operator: '=',
     value: userId,
   });

@@ -1,5 +1,6 @@
 const { imageKit } = require('../config/imageKit');
 const knex = require('../database');
+const BlogModel = require('./BlogModel');
 const ImageModel = require('./ImageModel');
 const Model = require('./Model/Model');
 const SocialMediaModel = require('./SocialMediaModel');
@@ -20,7 +21,6 @@ class UsersModel extends Model {
 
   static selectableProps = [
     'users.id as id',
-    'blog.id as blog_id',
     'users.display_name as display_name',
     'users.username as user_name',
     'users.email as email',
@@ -30,6 +30,7 @@ class UsersModel extends Model {
     'user_image.file_id as fileId',
     'user_image.image as image',
     'user_image.thumbnail as thumbnail',
+    BlogModel.ftsBlogJSON,
     SocialMediaModel.socialMediaJSON,
   ];
 
@@ -51,10 +52,10 @@ class UsersModel extends Model {
       },
     },
     {
-      modelClass: 'blog',
+      modelClass: 'fts_blog',
       join: {
         type: 'join',
-        from: 'blog.user_id',
+        from: 'fts_blog.user_id',
         to: 'users.id',
       },
     },
@@ -104,14 +105,12 @@ class UsersModel extends Model {
         thumbnail: data.thumbnail,
       };
 
-      console.log(imageToUpdate);
-
       const { imageId: oldImageId } = await this.table
         .first('image_id')
         .where('id', userId)
         .transacting(trx);
 
-      if (oldImageId !== data.fileId) {
+      if (oldImageId !== data.file_id) {
         await ImageModel.insert(trx, imageToUpdate);
       }
 
@@ -125,12 +124,12 @@ class UsersModel extends Model {
           website: data.website,
           location: data.location,
           location_code: data.locationCode,
-          image_id: data.fileId,
+          image_id: data.file_id,
         },
         ['id']
       );
 
-      if (oldImageId && oldImageId !== data.fileId) {
+      if (oldImageId && oldImageId !== data.file_id) {
         // If the image_id's do not match then delete the old image from imagekit and the database
         imageKit.deleteFile(oldImageId, (error) => {
           if (error) {

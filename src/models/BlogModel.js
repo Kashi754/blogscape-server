@@ -67,6 +67,18 @@ class BlogModel extends Model {
     });
   }
 
+  static ftsBlogJSON = knex.raw(`
+    json_build_object(
+      'id', fts_blog.id,
+      'title', fts_blog.title,
+      'description', fts_blog.description,
+      'author', fts_blog.author,
+      'image', fts_blog.image,
+      'created_at', fts_blog.created_at,
+      'followers', fts_blog.followers
+    ) as blog
+  `);
+
   static async getSuggestions(searchParams) {
     if (!searchParams) {
       throw new Error('Search params not defined!');
@@ -175,13 +187,14 @@ class BlogModel extends Model {
     return await super.list(null, null, limit, null, resultOrder);
   }
 
-  static async update(userId, { title, description, ...image }) {
+  static async update(userId, data) {
     BlogModel.userId = userId;
+    console.log(data);
     const results = await knex.transaction(async (trx) => {
       const imageToUpdate = {
-        file_id: image.fileId,
-        image: image.image,
-        thumbnail: image.thumbnail,
+        file_id: data.file_id,
+        image: data.image,
+        thumbnail: data.thumbnail,
       };
 
       // Get the old image_id from the database
@@ -190,8 +203,10 @@ class BlogModel extends Model {
         .where('user_id', userId)
         .transacting(trx);
 
+      console.log(oldImageId, data.file_id);
+
       // if the image_id's do not match then insert the image
-      if (oldImageId !== image.fileId) {
+      if (oldImageId !== data.file_id) {
         await ImageModel.insert(trx, imageToUpdate);
       }
 
@@ -199,11 +214,15 @@ class BlogModel extends Model {
       await super.update(
         trx,
         blogId,
-        { title, description, image_id: image.fileId },
+        {
+          title: data.title,
+          description: data.description,
+          image_id: data.file_id,
+        },
         ['id']
       );
 
-      if (oldImageId && oldImageId !== image.fileId) {
+      if (oldImageId && oldImageId !== data.file_id) {
         // If the image_id's do not match then delete the old image from imagekit and the database
         imageKit.deleteFile(oldImageId, (error) => {
           if (error) {

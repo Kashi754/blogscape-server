@@ -18,7 +18,6 @@ v1Router.get('/secret', checkAuthenticated, (req, res) => {
   });
 
   const authenticationParameters = imageKit.getAuthenticationParameters();
-  console.log(authenticationParameters);
   res.send(authenticationParameters);
 });
 v1Router.get('/health', (_req, res) => {

@@ -9,6 +9,7 @@ const BLOG_VIEW_CONFIGURATION = `
   SELECT blog.id as id,
     blog.title as title,
     blog.description as description,
+    blog.user_id as user_id,
     users.display_name as author,
     image.image as image,
     image.thumbnail as thumbnail,
