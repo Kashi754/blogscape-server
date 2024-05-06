@@ -1,4 +1,5 @@
 const Model = require('./Model/Model');
+const TagModel = require('./TagModel');
 
 class PostTagModel extends Model {
   static tableName = 'post_tag';
@@ -32,18 +33,18 @@ class PostTagModel extends Model {
   ];
 
   static async insert(trx, postId, tags) {
-    const existingTags = await super.findBy(
+    const existingTags = await TagModel.findBy(
       {
         type: 'In',
         column: 'name',
-        value: tags,
+        value: tags.map((tag) => tag.name),
       },
       trx,
-      'tag_id'
+      'id'
     );
 
     const nonExistentTags = tags.filter(
-      (tag) => !existingTags.some((t) => t.name === tag)
+      (tag) => !existingTags.some((t) => t.name === tag.name)
     );
 
     if (nonExistentTags.length > 0) {
@@ -56,7 +57,7 @@ class PostTagModel extends Model {
       trx,
       existingTags.map((tag) => ({
         post_id: postId,
-        tag_id: tag.tagId,
+        tag_id: tag.id,
       }))
     );
   }

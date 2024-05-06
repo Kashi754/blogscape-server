@@ -38,13 +38,14 @@ class PostModel extends Model {
 
   static async create(loggedInBlogId, data) {
     const results = await knex.transaction(async (trx) => {
-      const imageToUpdate = {
-        file_id: data.fileId,
-        image: data.image,
-        thumbnail: data.thumbnail,
-      };
-
-      await ImageModel.insert(trx, imageToUpdate);
+      if (data.file_id) {
+        const imageToUpdate = {
+          file_id: data.file_id,
+          image: data.image,
+          thumbnail: data.thumbnail,
+        };
+        await ImageModel.insert(trx, imageToUpdate);
+      }
 
       const postIdResult = await super.insert(
         trx,
@@ -54,7 +55,7 @@ class PostModel extends Model {
           subtitle: data.subtitle,
           plaintext_body: data.plaintextBody,
           body: data.body,
-          image_id: data.fileId,
+          image_id: data.file_id,
           blog_id: loggedInBlogId,
         },
         ['id']

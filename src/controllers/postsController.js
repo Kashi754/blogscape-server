@@ -55,6 +55,7 @@ exports.postsIdGet = asyncHandler(async (req, res) => {
 });
 
 exports.postsCreatePost = asyncHandler(async (req, res) => {
+  const blogId = req.user.blogId;
   const newPost = req.body;
 
   // TODO: parse markdown into plaintext
