@@ -21,14 +21,15 @@ class BlogModel extends Model {
   ];
   static selectableProps = [
     'fts_blog.id as id',
-    'fts_blog.title as title',
-    'fts_blog.description as description',
-    'fts_blog.author as author',
-    'fts_blog.image as image',
-    'fts_blog.thumbnail as thumbnail',
-    'fts_blog.file_id as file_id',
-    'fts_blog.created_at as created_at',
-    'fts_blog.followers as followers',
+    'title',
+    'description',
+    'author',
+    'author_id',
+    'image',
+    'thumbnail',
+    'file_id',
+    'created_at',
+    'followers',
     knex.raw(
       `
         CASE

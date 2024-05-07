@@ -22,18 +22,19 @@ class PostModel extends Model {
   ];
 
   static selectableProps = [
-    'fts_post.author as author',
-    'fts_post.blog_id as blog_id',
-    'fts_post.id as id',
-    'fts_post.title as title',
-    'fts_post.subtitle as subtitle',
-    'fts_post.plaintext_body as plaintext_body',
-    'fts_post.body as body',
-    'fts_post.image as image',
-    'fts_post.thumbnail as thumbnail',
-    'fts_post.file_id as file_id',
-    'fts_post.created_at as created_at',
-    'fts_post.tags as tags',
+    'author',
+    'author_id',
+    'author_thumbnail',
+    'blog_id',
+    'id',
+    'title',
+    'subtitle',
+    'body',
+    'image',
+    'thumbnail',
+    'file_id',
+    'created_at',
+    'tags',
   ];
 
   static async create(loggedInBlogId, data) {

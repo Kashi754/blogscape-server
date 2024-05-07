@@ -11,6 +11,7 @@ const BLOG_VIEW_CONFIGURATION = `
     blog.description as description,
     blog.user_id as user_id,
     users.display_name as author,
+    users.id as author_id,
     image.image as image,
     image.thumbnail as thumbnail,
     image.file_id as file_id,

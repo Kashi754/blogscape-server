@@ -7,7 +7,9 @@ const POST_VIEW_CONFIGURATION = `
   CREATE MATERIALIZED VIEW fts_post
   AS
   SELECT
-    users.display_name as author,
+    authors.author as author,
+    authors.id as author_id,
+    authors.thumbnail as author_thumbnail,
     post.id as id,
     blog.id as blog_id,
     post.title as title,
@@ -26,7 +28,7 @@ const POST_VIEW_CONFIGURATION = `
     ) as tags,
     setweight(to_tsvector('english', post.title), 'B') ||
     setweight(to_tsvector('english', post.plaintext_body), 'C') ||
-    setweight(to_tsvector('simple', users.display_name), 'A') ||
+    setweight(to_tsvector('simple', authors.author), 'A') ||
     setweight(to_tsvector('simple', array_to_string((
       SELECT array(
         SELECT tag.name
@@ -37,7 +39,16 @@ const POST_VIEW_CONFIGURATION = `
     ), ' ')), 'A') AS search
   FROM post
   JOIN blog ON blog.id = post.blog_id
-  JOIN users ON users.id = blog.user_id
+  JOIN 
+    (
+      SELECT 
+        users.id as id,
+        users.display_name as author,
+        image.thumbnail as thumbnail
+      FROM users
+      LEFT OUTER JOIN image ON image.file_id = users.image_id
+    ) as authors 
+  ON authors.id = blog.user_id
   LEFT OUTER JOIN image ON image.file_id = post.image_id;
 `;
 
