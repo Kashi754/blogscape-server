@@ -24,7 +24,7 @@ class CommentModel extends Model {
     UsersModel.userCommentJSON,
     'comment.body as body',
     'comment.created_at as created_at',
-    'replies.reply_count',
+    this.countReplies('reply_count'),
   ];
 
   static relations = [
@@ -44,23 +44,14 @@ class CommentModel extends Model {
         to: 'users.image_id',
       },
     },
-    {
-      modelClass: CommentModel.countReplies('reply_count'),
-      join: {
-        type: 'leftOuter',
-        from: 'comment.id',
-        to: 'replies.id',
-      },
-    },
   ];
 
   static countReplies(as_alias) {
     return this.table
-      .select('id')
-      .count(`comment_id as ${as_alias}`)
-      .from('comment')
-      .groupBy('id')
-      .as('replies');
+      .count('*')
+      .from('comment as c2')
+      .whereRaw('c2.comment_id = comment.id')
+      .as(as_alias);
   }
 
   static async create(data) {
