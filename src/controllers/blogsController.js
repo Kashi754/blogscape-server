@@ -76,6 +76,11 @@ exports.meBlogGet = asyncHandler(async (req, res) => {
   res.send(blog);
 });
 
+exports.blogRandomGet = asyncHandler(async (req, res) => {
+  const blog = await BlogModel.random();
+  res.send(blog);
+});
+
 exports.getFollowedBlogs = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const blogs = await BlogModel.findBy(userId, {

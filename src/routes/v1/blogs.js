@@ -11,4 +11,6 @@ blogsRouter.get('/popular', blogsController.getPopularBlogs);
 
 blogsRouter.get('/:id', blogsController.blogIdGet);
 
+blogsRouter.get('/random', blogsController.blogRandomGet);
+
 module.exports = blogsRouter;

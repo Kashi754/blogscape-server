@@ -130,6 +130,33 @@ class Model {
     return result;
   }
 
+  static async random(transaction) {
+    const queryBuilder = await this.table
+      .offset(
+        knex.raw(`
+        floor(random() * (
+          select count(*)  
+          from ${this.materializedView || this.tableName}
+        ))
+      `)
+      )
+      .limit(1);
+
+    let result;
+
+    if (!transaction) {
+      result = await knex.transaction(async (trx) => {
+        return await queryBuilder
+          .transacting(trx)
+          .select(this.selectableProps || '*');
+      });
+    } else {
+      result = await queryBuilder
+        .transacting(transaction)
+        .select(this.selectableProps || '*');
+    }
+  }
+
   static async list(where, page, limit, search, order) {
     const list = await knex.transaction(async (trx) => {
       const queryBuilder = this.view.transacting(trx);

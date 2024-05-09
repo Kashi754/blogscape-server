@@ -154,17 +154,6 @@ class PostModel extends Model {
     return await super.list(blogId, nextPage, limit);
   }
 
-  static async findByBlogId(blogId) {
-    return await super.findBy(
-      {
-        column: 'blog_id',
-        value: blogId,
-        operator: '=',
-      },
-      null
-    );
-  }
-
   static async update(loggedInBlogId, postId, data) {
     const results = await knex.transaction(async (trx) => {
       const imageToUpdate = {

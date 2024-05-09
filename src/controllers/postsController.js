@@ -54,6 +54,11 @@ exports.postsIdGet = asyncHandler(async (req, res) => {
   res.send(post[0]);
 });
 
+exports.postsRandomGet = asyncHandler(async (req, res) => {
+  const post = await PostModel.random();
+  res.send(post);
+});
+
 exports.postsCreatePost = asyncHandler(async (req, res) => {
   const blogId = req.user.blogId;
   const newPost = req.body;

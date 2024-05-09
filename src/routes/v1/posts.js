@@ -17,4 +17,6 @@ postsRouter.get('/:id/comments', commentsController.commentsList);
 
 postsRouter.post('/:id/comments', commentsController.createComment);
 
+postsRouter.get('/random', postsController.postsRandomGet);
+
 module.exports = postsRouter;
