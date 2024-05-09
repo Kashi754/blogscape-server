@@ -130,13 +130,13 @@ class Model {
     return result;
   }
 
-  static async random(transaction) {
-    const queryBuilder = await this.table
+  static async randomId(transaction) {
+    const queryBuilder = this.table
       .offset(
         knex.raw(`
-        floor(random() * (
-          select count(*)  
-          from ${this.materializedView || this.tableName}
+        floor(RANDOM() * (
+          SELECT COUNT(*)  
+          FROM ${this.tableName}
         ))
       `)
       )
@@ -146,15 +146,13 @@ class Model {
 
     if (!transaction) {
       result = await knex.transaction(async (trx) => {
-        return await queryBuilder
-          .transacting(trx)
-          .select(this.selectableProps || '*');
+        return await queryBuilder.transacting(trx).first('id');
       });
     } else {
-      result = await queryBuilder
-        .transacting(transaction)
-        .select(this.selectableProps || '*');
+      result = await queryBuilder.transacting(transaction).first('id');
     }
+
+    return result;
   }
 
   static async list(where, page, limit, search, order) {

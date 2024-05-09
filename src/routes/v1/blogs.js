@@ -9,8 +9,8 @@ blogsRouter.get('/search', blogsController.blogSearch);
 
 blogsRouter.get('/popular', blogsController.getPopularBlogs);
 
-blogsRouter.get('/:id', blogsController.blogIdGet);
-
 blogsRouter.get('/random', blogsController.blogRandomGet);
+
+blogsRouter.get('/:id', blogsController.blogIdGet);
 
 module.exports = blogsRouter;
