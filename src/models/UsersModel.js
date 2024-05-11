@@ -118,7 +118,7 @@ class UsersModel extends Model {
         trx,
         userId,
         {
-          display_name: data.displayName,
+          display_name: data.display_name,
           username: data.username,
           email: data.email,
           website: data.website,
