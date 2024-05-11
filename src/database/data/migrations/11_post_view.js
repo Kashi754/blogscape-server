@@ -12,6 +12,7 @@ const POST_VIEW_CONFIGURATION = `
     authors.thumbnail as author_thumbnail,
     post.id as id,
     blog.id as blog_id,
+    blog.title as blog_title,
     post.title as title,
     post.subtitle as subtitle,
     post.plaintext_body as plaintext_body,

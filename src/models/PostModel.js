@@ -26,6 +26,7 @@ class PostModel extends Model {
     'author_id',
     'author_thumbnail',
     'blog_id',
+    'blog_title',
     'id',
     'title',
     'subtitle',
@@ -35,7 +36,18 @@ class PostModel extends Model {
     'file_id',
     'created_at',
     'tags',
+    this.countComments('comment_count'),
   ];
+
+  static countComments(as_alias) {
+    const query = this.table
+      .count('*')
+      .from('comment')
+      .whereRaw('comment.post_id = fts_post.id')
+      .as(as_alias);
+
+    return query;
+  }
 
   static async create(loggedInBlogId, data) {
     const results = await knex.transaction(async (trx) => {
