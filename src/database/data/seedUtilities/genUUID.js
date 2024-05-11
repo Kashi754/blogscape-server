@@ -4,4 +4,4 @@ function genUserIds(n) {
   return Array.from({ length: n }, () => uuidv4());
 }
 
-exports.userIds = genUserIds(1000);
+exports.userIds = genUserIds(100);

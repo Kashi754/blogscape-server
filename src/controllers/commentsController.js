@@ -28,8 +28,6 @@ exports.createComment = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   const { commentId } = req.query;
 
-  console.log(req.body);
-
   const commentToAdd = {
     body: req.body.comment,
     user_id: userId,

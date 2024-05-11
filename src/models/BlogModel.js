@@ -190,7 +190,6 @@ class BlogModel extends Model {
 
   static async update(userId, data) {
     BlogModel.userId = userId;
-    console.log(data);
     const results = await knex.transaction(async (trx) => {
       const imageToUpdate = {
         file_id: data.file_id,
@@ -203,8 +202,6 @@ class BlogModel extends Model {
         .first('image_id', 'id as blog_id')
         .where('user_id', userId)
         .transacting(trx);
-
-      console.log(oldImageId, data.file_id);
 
       // if the image_id's do not match then insert the image
       if (oldImageId !== data.file_id) {

@@ -162,10 +162,9 @@ class PostModel extends Model {
         value: beforeId,
       },
     ];
-    console.log(blogId);
 
     return await super.list(
-      { column: 'blog_id', operator: '=', value: blogId },
+      blogId ? { column: 'blog_id', operator: '=', value: blogId } : null,
       nextPage,
       limit
     );
