@@ -9,9 +9,7 @@ exports.postsList = asyncHandler(async (req, res) => {
     return res.status(400).send('Both beforeDate and beforeId are required');
   }
 
-  const blogIdQuery = blogId ? { blog_id: blogId } : null;
-
-  const posts = await PostModel.list(blogIdQuery, beforeDate, beforeId, limit);
+  const posts = await PostModel.list(blogId, beforeDate, beforeId, limit);
 
   res.send(posts);
 });
