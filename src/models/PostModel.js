@@ -163,7 +163,11 @@ class PostModel extends Model {
       },
     ];
 
-    return await super.list(blogId, nextPage, limit);
+    return await super.list(
+      { column: 'blog_id', operator: '=', value: blogId },
+      nextPage,
+      limit
+    );
   }
 
   static async update(loggedInBlogId, postId, data) {

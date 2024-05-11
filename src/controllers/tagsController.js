@@ -2,7 +2,11 @@ const asyncHandler = require('express-async-handler');
 const TagModel = require('../models/TagModel');
 
 exports.tagsList = asyncHandler(async (req, res) => {
-  const tags = await TagModel.list();
+  const startsWith = req.query.startsWith;
+  const where = startsWith
+    ? { type: 'ILike', column: 'name', value: `#${startsWith}%` }
+    : null;
+  const tags = await TagModel.list(where);
   res.send(tags);
 });
 

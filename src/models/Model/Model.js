@@ -160,7 +160,7 @@ class Model {
       const queryBuilder = this.view.transacting(trx);
 
       if (where) {
-        queryBuilder.where(where);
+        queryBuilder.modify(Builder.where, where);
       }
 
       if (page) {
