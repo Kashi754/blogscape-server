@@ -13,7 +13,6 @@ exports.up = function (knex) {
       .onDelete('cascade');
     table.string('title', 100).notNullable();
     table.string('subtitle', 300).nullable();
-    table.text('plaintext_body').notNullable();
     table.text('body').notNullable();
     table
       .string('image_id', 50)

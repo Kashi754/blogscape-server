@@ -7,7 +7,6 @@ const {
   blogFollowersController,
   postsController,
   socialMediaController,
-  meController,
 } = require('../../controllers');
 meRouter.get('/profile', usersController.meGetProfile);
 
@@ -23,7 +22,7 @@ meRouter.get('/following', blogsController.getFollowedBlogs);
 
 meRouter.put('/following', blogFollowersController.changeFollowingStatus);
 
-meRouter.get('/posts', postsController.mePostsList);
+meRouter.get('/posts', postsController.postsList);
 
 meRouter.put('/password', usersController.meUpdatePassword);
 

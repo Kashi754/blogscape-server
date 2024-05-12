@@ -3,7 +3,7 @@ const asyncHandler = require('express-async-handler');
 const PostModel = require('../models/PostModel');
 
 exports.postsList = asyncHandler(async (req, res) => {
-  const { blogId, beforeDate, beforeId, limit } = req.query;
+  const { blogId = req.user.blogId, beforeDate, beforeId, limit } = req.query;
 
   if ((beforeDate && !beforeId) || (!beforeDate && beforeId)) {
     return res.status(400).send('Both beforeDate and beforeId are required');
@@ -16,6 +16,10 @@ exports.postsList = asyncHandler(async (req, res) => {
 
 exports.postsSearch = asyncHandler(async (req, res) => {
   const { q: query, beforeRank, beforeId, limit } = req.query;
+  console.log(query);
+  console.log(beforeRank);
+  console.log(beforeId);
+  console.log(limit);
 
   if ((beforeRank && !beforeId) || (!beforeRank && beforeId) || !query) {
     return res.status(400).send('Please provide all required parameters');
@@ -61,23 +65,9 @@ exports.postsCreatePost = asyncHandler(async (req, res) => {
   const blogId = req.user.blogId;
   const newPost = req.body;
 
-  // TODO: parse markdown into plaintext
-  req.body.plaintextBody = newPost.body;
-
   const post = await PostModel.create(blogId, newPost);
 
   res.send(post);
-});
-
-exports.mePostsList = asyncHandler(async (req, res) => {
-  const blogId = req.user.blogId;
-  const posts = await PostModel.findBy({
-    column: 'blog_id',
-    operator: '=',
-    value: blogId,
-  });
-
-  res.send(posts);
 });
 
 exports.postsCommentsList = asyncHandler(async (req, res) => {

@@ -66,7 +66,6 @@ class PostModel extends Model {
           ...defaultPostData,
           title: data.title,
           subtitle: data.subtitle,
-          plaintext_body: data.plaintextBody,
           body: data.body,
           image_id: data.file_id,
           blog_id: loggedInBlogId,
@@ -201,7 +200,6 @@ class PostModel extends Model {
         {
           title: data.title,
           subtitle: data.subtitle,
-          plaintext_body: data.plaintextBody,
           body: data.body,
           image_id: data.fileId,
         },

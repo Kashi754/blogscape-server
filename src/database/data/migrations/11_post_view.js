@@ -15,7 +15,6 @@ const POST_VIEW_CONFIGURATION = `
     blog.title as blog_title,
     post.title as title,
     post.subtitle as subtitle,
-    post.plaintext_body as plaintext_body,
     post.body as body,
     image.image as image,
     image.thumbnail as thumbnail,
@@ -28,7 +27,7 @@ const POST_VIEW_CONFIGURATION = `
       WHERE post_tag.post_id = post.id
     ) as tags,
     setweight(to_tsvector('english', post.title), 'B') ||
-    setweight(to_tsvector('english', post.plaintext_body), 'C') ||
+    setweight(to_tsvector('english', post.body), 'C') ||
     setweight(to_tsvector('simple', authors.author), 'A') ||
     setweight(to_tsvector('simple', array_to_string((
       SELECT array(
@@ -58,7 +57,7 @@ const POST_WORDS_VIEW_CONFIGURATION = `
   AS
   SELECT word FROM ts_stat(
       'SELECT to_tsvector(''simple'', fp.title) ||
-              to_tsvector(''simple'', fp.plaintext_body) ||
+              to_tsvector(''simple'', fp.body) ||
               to_tsvector(''simple'', fp.author) ||
               to_tsvector(''simple'', array_to_string(fp.tags, '' '')) as vect
       FROM	fts_post fp'
