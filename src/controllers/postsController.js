@@ -16,10 +16,6 @@ exports.postsList = asyncHandler(async (req, res) => {
 
 exports.postsSearch = asyncHandler(async (req, res) => {
   const { q: query, beforeRank, beforeId, limit } = req.query;
-  console.log(query);
-  console.log(beforeRank);
-  console.log(beforeId);
-  console.log(limit);
 
   if ((beforeRank && !beforeId) || (!beforeRank && beforeId) || !query) {
     return res.status(400).send('Please provide all required parameters');

@@ -158,34 +158,60 @@ class BlogModel extends Model {
 
   static async list(
     userId,
-    beforeDate = 'infinity',
-    beforeId = '999999999',
+    subset,
+    {
+      beforeDate = 'infinity',
+      beforeId = '999999999',
+      beforeFollowers = '999999999',
+    },
     limit
   ) {
     BlogModel.userId = userId;
 
-    const nextPage = [
-      {
-        column: 'created_at',
-        value: beforeDate,
-      },
+    let nextPage = [
       {
         column: 'fts_blog.id',
         value: beforeId,
       },
     ];
-    return await super.list(null, nextPage, limit);
-  }
 
-  static async listPopular(userId, limit) {
-    BlogModel.userId = userId;
+    let order;
+    let where;
 
-    const resultOrder = {
-      column: 'followers',
-      direction: 'desc',
-    };
+    if (subset === 'popular') {
+      nextPage.unshift({
+        column: 'followers',
+        value: beforeFollowers,
+      });
 
-    return await super.list(null, null, limit, null, resultOrder);
+      order = [
+        {
+          column: 'followers',
+          direction: 'desc',
+        },
+        {
+          column: 'fts_blog.id',
+          direction: 'desc',
+        },
+      ];
+    } else if (subset === 'following') {
+      nextPage.unshift({
+        column: 'created_at',
+        value: beforeDate,
+      });
+
+      where = {
+        column: 'blog_following.user_id',
+        type: 'NotNull',
+      };
+    } else {
+      nextPage.unshift({
+        column: 'created_at',
+        value: beforeDate,
+      });
+    }
+
+    return await super.list(where, nextPage, limit, null, order);
   }
 
   static async update(userId, data) {

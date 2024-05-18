@@ -11,7 +11,12 @@ exports.blogList = asyncHandler(async (req, res) => {
     return res.status(400).send('Both beforeDate and beforeId are required');
   }
 
-  const blogs = await BlogModel.list(userId, beforeDate, beforeId, limit);
+  const blogs = await BlogModel.list(
+    userId,
+    null,
+    { beforeDate, beforeId },
+    limit
+  );
 
   res.send(blogs);
 });
@@ -83,10 +88,23 @@ exports.blogRandomGet = asyncHandler(async (req, res) => {
 
 exports.getFollowedBlogs = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const blogs = await BlogModel.findBy(userId, {
-    column: 'blog_following.user_id',
-    type: 'NotNull',
-  });
+  const { beforeId, beforeDate, limit } = req.query;
+
+  if ((beforeId && !beforeDate) || (!beforeId && beforeDate)) {
+    return res
+      .status(400)
+      .send('Both beforeId and beforeFollowers are required');
+  }
+
+  const blogs = await BlogModel.list(
+    userId,
+    'following',
+    {
+      beforeId,
+      beforeFollowers: beforeDate,
+    },
+    limit
+  );
 
   if (blogs.length === 0) {
     return res.status(404).send('No followed blogs found');
@@ -97,6 +115,18 @@ exports.getFollowedBlogs = asyncHandler(async (req, res) => {
 
 exports.getPopularBlogs = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const blogs = await BlogModel.listPopular(userId, 10);
+  const { beforeId, beforeFollowers, limit } = req.query;
+
+  if ((beforeId && !beforeFollowers) || (!beforeId && beforeFollowers)) {
+    return res
+      .status(400)
+      .send('Both beforeId and beforeFollowers are required');
+  }
+  const blogs = await BlogModel.list(
+    userId,
+    'popular',
+    { beforeId, beforeFollowers },
+    limit
+  );
   res.send(blogs);
 });
