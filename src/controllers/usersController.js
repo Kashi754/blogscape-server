@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const UsersModel = require('../models/UsersModel');
+const bcrypt = require('bcrypt');
 
 exports.usersIdGet = asyncHandler(async (req, res) => {
   const userId = req.params.id;
@@ -29,11 +30,41 @@ exports.meGetProfile = asyncHandler(async (req, res) => {
 
 exports.meUpdateProfile = asyncHandler(async (req, res) => {
   const userId = req.user.id;
-  const updatedProfile = await UsersModel.update(userId, req.body);
+  const updatedProfile = await UsersModel.updateProfile(userId, req.body);
 
   res.send(updatedProfile);
 });
 
 exports.meUpdatePassword = asyncHandler(async (req, res, next) => {
-  res.send('NOT IMPLEMENTED: users update password route');
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  // Verify old password
+  const oldPasswordHash = await UsersModel.getPasswordHash(userId);
+
+  console.log('oldPasswordHash', oldPasswordHash);
+  console.log('oldPassword', oldPassword);
+
+  const matchedPassword = await bcrypt.compare(oldPassword, oldPasswordHash);
+  if (!matchedPassword) {
+    return res.status(401).send('Incorrect Password');
+  }
+
+  // Hash new password
+  const SALT_ROUNDS = 10;
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  const hash = await bcrypt.hash(newPassword, salt);
+
+  if (oldPasswordHash === hash) {
+    return res
+      .status(400)
+      .send('New password must be different from old password');
+  }
+
+  // Update password in database
+  await UsersModel.update(null, userId, {
+    password_hash: hash,
+  });
+
+  res.send('Password Successfully Changed');
 });

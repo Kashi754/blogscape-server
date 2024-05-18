@@ -97,7 +97,7 @@ class UsersModel extends Model {
     return results;
   }
 
-  static async update(userId, data) {
+  static async updateProfile(userId, data) {
     const results = await knex.transaction(async (trx) => {
       const imageToUpdate = {
         file_id: data.file_id,
@@ -171,6 +171,17 @@ class UsersModel extends Model {
     });
 
     return user;
+  }
+
+  static async getPasswordHash(userId) {
+    const { passwordHash = null } = await knex.transaction(async (trx) => {
+      return await this.table
+        .where('id', userId)
+        .transacting(trx)
+        .first('password_hash');
+    });
+
+    return passwordHash;
   }
 }
 
