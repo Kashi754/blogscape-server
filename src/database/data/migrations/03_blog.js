@@ -12,7 +12,7 @@ exports.up = function (knex) {
       .onUpdate('cascade')
       .onDelete('cascade');
     table.string('title', 100).notNullable();
-    table.string('description', 300).notNullable();
+    table.string('description', 300).nullable();
     table
       .string('image_id', 50)
       .nullable()

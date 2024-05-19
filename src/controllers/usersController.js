@@ -42,9 +42,6 @@ exports.meUpdatePassword = asyncHandler(async (req, res, next) => {
   // Verify old password
   const oldPasswordHash = await UsersModel.getPasswordHash(userId);
 
-  console.log('oldPasswordHash', oldPasswordHash);
-  console.log('oldPassword', oldPassword);
-
   const matchedPassword = await bcrypt.compare(oldPassword, oldPasswordHash);
   if (!matchedPassword) {
     return res.status(401).send('Incorrect Password');

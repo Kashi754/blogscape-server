@@ -80,7 +80,7 @@ class UsersModel extends Model {
           .transacting(trx)
           .insert({
             title: blogTitle,
-            user_id: userId[0].id,
+            user_id: userId,
           })
           .returning('id');
 
@@ -91,6 +91,7 @@ class UsersModel extends Model {
           blogId,
         };
       } catch (err) {
+        console.log('error: ', err);
         return null;
       }
     });
