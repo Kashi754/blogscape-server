@@ -29,6 +29,7 @@ const POST_VIEW_CONFIGURATION = `
     setweight(to_tsvector('english', post.title), 'B') ||
     setweight(to_tsvector('english', post.body), 'C') ||
     setweight(to_tsvector('simple', authors.author), 'A') ||
+    setweight(to_tsvector('english', blog.title), 'C') ||
     setweight(to_tsvector('simple', array_to_string((
       SELECT array(
         SELECT tag.name
@@ -59,6 +60,7 @@ const POST_WORDS_VIEW_CONFIGURATION = `
       'SELECT to_tsvector(''simple'', fp.title) ||
               to_tsvector(''simple'', fp.body) ||
               to_tsvector(''simple'', fp.author) ||
+              to_tsvector(''simple'', fp.blog_title) ||
               to_tsvector(''simple'', array_to_string(fp.tags, '' '')) as vect
       FROM	fts_post fp'
   );
@@ -94,6 +96,12 @@ const REFRESH_POST_VIEW_TRIGGERS = `
   ON users
   FOR EACH STATEMENT
   EXECUTE PROCEDURE refresh_fts_post();
+  
+  CREATE OR REPLACE TRIGGER refresh_fts_post_blog_trigger
+  AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
+  ON blog
+  FOR EACH STATEMENT
+  EXECUTE PROCEDURE refresh_fts_post();
 
   CREATE OR REPLACE TRIGGER refresh_fts_post_tag_trigger
   AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
@@ -116,6 +124,12 @@ const REFRESH_POST_VIEW_TRIGGERS = `
   CREATE OR REPLACE TRIGGER refresh_fts_post_words_post_trigger
   AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
   ON post
+  FOR EACH STATEMENT
+  EXECUTE PROCEDURE refresh_fts_post_words();
+
+  CREATE OR REPLACE TRIGGER refresh_fts_post_words_blog_trigger
+  AFTER INSERT OR UPDATE OR DELETE OR TRUNCATE
+  ON blog
   FOR EACH STATEMENT
   EXECUTE PROCEDURE refresh_fts_post_words();
 
