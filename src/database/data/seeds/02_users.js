@@ -8,11 +8,11 @@ const { userIds } = require('../seedUtilities/genUUID');
 exports.seed = async function (knex) {
   const users = userIds.map((id, index) => ({
     id,
-    username: `testUser${index}`,
+    username: `testUser${index + 1}`,
     email: `user${index}@gmail.com`,
     password_hash:
-      '$2b$10$LYFpAAkIYDCY1UYFMSa5hOBge8NvwoDp/rtqGv3seHIe1hbPME6P2',
-    display_name: `Test User ${index}`,
+      '$2b$10$1f79CZZn12k1fZ.zdsH01ONQHCLPNleXrizplFmvdPAFDlj8fuPHm',
+    display_name: `Test User ${index + 1}`,
     website: 'https://www.kashi754.com',
     location: 'United States',
     location_code: 'US',
@@ -26,7 +26,7 @@ exports.seed = async function (knex) {
       username: 'kashi754',
       email: 'arigorn15@gmail.com',
       password_hash:
-        '$2b$10$LYFpAAkIYDCY1UYFMSa5hOBge8NvwoDp/rtqGv3seHIe1hbPME6P2',
+        '$2b$10$1f79CZZn12k1fZ.zdsH01ONQHCLPNleXrizplFmvdPAFDlj8fuPHm',
     },
     ...users,
   ]);

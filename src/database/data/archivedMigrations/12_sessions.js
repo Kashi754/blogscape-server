@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('sessions', (table) => {
+  return knex.schema.createTableIfNotExists('sessions', (table) => {
     table.string('sid', 255).primary();
     table.json('sess').notNullable();
     table.timestamp('expired').notNullable();
@@ -15,5 +15,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTableIfExists('sessions');
+  // return knex.schema.dropTableIfExists('sessions');
 };

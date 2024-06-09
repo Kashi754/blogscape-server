@@ -1,8 +1,22 @@
 const express = require('express');
 const ImageKit = require('imagekit');
 const { checkAuthenticated } = require('../../middleware/auth');
-
+const knex = require('../../database');
 const v1Router = express.Router();
+
+const config = require('./../../config/environment');
+
+if (config.env !== 'production') {
+  v1Router.post('/reset', (req, res) => {
+    knex.migrate.rollback().then(() => {
+      knex.migrate.latest().then(() => {
+        knex.seed.run().then(() => {
+          res.sendStatus(200);
+        });
+      });
+    });
+  });
+}
 
 v1Router.use('/auth', require('./auth'));
 v1Router.use('/blogs', checkAuthenticated, require('./blogs'));

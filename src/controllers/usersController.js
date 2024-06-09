@@ -12,7 +12,7 @@ exports.usersIdGet = asyncHandler(async (req, res) => {
   });
 
   if (user.length === 0) {
-    return res.status(404).send(`User with id ${req.params.id} not found`);
+    return res.status(404).send(`User with id ${userId} not found`);
   }
 
   res.send(user[0]);
@@ -47,16 +47,16 @@ exports.meUpdatePassword = asyncHandler(async (req, res, next) => {
     return res.status(401).send('Incorrect Password');
   }
 
-  // Hash new password
-  const SALT_ROUNDS = 10;
-  const salt = await bcrypt.genSalt(SALT_ROUNDS);
-  const hash = await bcrypt.hash(newPassword, salt);
-
-  if (oldPasswordHash === hash) {
+  if (oldPassword === newPassword) {
     return res
       .status(400)
       .send('New password must be different from old password');
   }
+
+  // Hash new password
+  const SALT_ROUNDS = 10;
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  const hash = await bcrypt.hash(newPassword, salt);
 
   // Update password in database
   await UsersModel.update(null, userId, {

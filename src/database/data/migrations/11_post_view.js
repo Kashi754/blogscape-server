@@ -172,10 +172,12 @@ const DROP_REFRESH_POST_VIEW_FUNCTION = `
 const DROP_POST_VIEW_TRIGGERS = `
   DROP TRIGGER IF EXISTS refresh_fts_post_trigger ON post;
   DROP TRIGGER IF EXISTS refresh_fts_post_user_trigger ON users;
+  DROP TRIGGER IF EXISTS refresh_fts_post_blog_trigger ON blog;
   DROP TRIGGER IF EXISTS refresh_fts_post_tag_trigger ON post_tag;
   DROP TRIGGER IF EXISTS refresh_fts_tag_trigger ON tag;
   DROP TRIGGER IF EXISTS refresh_fts_post_image_trigger ON image;
   DROP TRIGGER IF EXISTS refresh_fts_post_words_post_trigger ON post;
+  DROP TRIGGER IF EXISTS refresh_fts_post_words_blog_trigger ON blog;
   DROP TRIGGER IF EXISTS refresh_fts_post_words_user_trigger ON users;
   DROP TRIGGER IF EXISTS refresh_fts_post_words_post_tag_trigger ON post_tag;
   DROP TRIGGER IF EXISTS refresh_fts_post_words_tag_trigger ON tag;

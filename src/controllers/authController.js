@@ -79,7 +79,7 @@ exports.authLogoutPost = (req, res, next) => {
     }
   });
   res.clearCookie('user');
-  res.status(201).send();
+  res.status(204).send();
 };
 
 exports.getUserAuth = (username) => {

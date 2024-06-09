@@ -8,8 +8,8 @@ const { userIds } = require('../seedUtilities/genUUID');
 exports.seed = async function (knex) {
   const blogs = userIds.map((id, index) => ({
     user_id: id,
-    title: `testUser${index}'s Blog`,
-    description: `This is testUser${index}'s personal blog.`,
+    title: `testUser${index + 1}'s Blog`,
+    description: `This is testUser${index + 1}'s personal blog.`,
   }));
 
   // Deletes ALL existing entries

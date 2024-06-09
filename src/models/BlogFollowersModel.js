@@ -30,7 +30,7 @@ class BlogFollowersModel extends Model {
       return await super.insert(
         trx,
         blogIds.map((id) => ({ blog_id: id, user_id: userId })),
-        null
+        'blog_id'
       );
     });
     return response;

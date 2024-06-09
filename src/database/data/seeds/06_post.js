@@ -23,7 +23,6 @@ const posts = [
     blog_id: 2,
     title: "TestUser1's first post!",
     subtitle: "Thank you for reading TestUser1's first post!",
-
     // Body
     body: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae turpis massa sed elementum. Vel turpis nunc eget lorem dolor sed viverra. Ac turpis egestas integer eget aliquet nibh praesent tristique magna. Vel facilisis volutpat est velit egestas dui id ornare arcu. Arcu non sodales neque sodales. Vulputate ut pharetra sit amet aliquam id. Malesuada proin libero nunc consequat. Cras semper auctor neque vitae. Est ante in nibh mauris cursus mattis molestie a. Diam phasellus vestibulum lorem sed risus. Et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit.
     Tortor at risus viverra adipiscing at in tellus. Pharetra pharetra massa massa ultricies mi quis hendrerit dolor. Morbi tempus iaculis urna id volutpat. Ut sem viverra aliquet eget. Amet nisl purus in mollis nunc. Feugiat scelerisque varius morbi enim. Congue eu consequat ac felis. Mauris ultrices eros in cursus turpis. Dictum fusce ut placerat orci nulla pellentesque dignissim. Gravida neque convallis a cras semper auctor neque. Imperdiet proin fermentum leo vel orci porta non. Quam nulla porttitor massa id neque aliquam vestibulum morbi blandit. Mauris pellentesque pulvinar pellentesque habitant morbi tristique senectus et. In iaculis nunc sed augue lacus viverra vitae congue. Pretium nibh ipsum consequat nisl. Velit scelerisque in dictum non consectetur. Odio pellentesque diam volutpat commodo.
@@ -36,6 +35,7 @@ const posts = [
     blog_id: 2,
     title: "TestUser1's Second post!",
     subtitle: "Thank you for reading TestUser1's second post!",
+    image_id: '66507ddb37b244ef54240d46',
 
     // Body
     body: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae turpis massa sed elementum. Vel turpis nunc eget lorem dolor sed viverra. Ac turpis egestas integer eget aliquet nibh praesent tristique magna. Vel facilisis volutpat est velit egestas dui id ornare arcu. Arcu non sodales neque sodales. Vulputate ut pharetra sit amet aliquam id. Malesuada proin libero nunc consequat. Cras semper auctor neque vitae. Est ante in nibh mauris cursus mattis molestie a. Diam phasellus vestibulum lorem sed risus. Et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit.
